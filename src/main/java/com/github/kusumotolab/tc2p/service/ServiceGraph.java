@@ -11,26 +11,26 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
   private final ViewFactory<V> viewFactory;
   private final PresenterFactory<V, P> presenterFactory;
   private final UseCaseFactory<P, U> useCaseFactory;
-  private final ControllerFactory<P, U, C> controllerFactory;
+  private final ControllerFactory<U, C> controllerFactory;
 
   private ServiceGraph(final ViewFactory<V> viewFactory,
       final PresenterFactory<V, P> presenterFactory, final UseCaseFactory<P, U> useCaseFactory,
-      final ControllerFactory<P, U, C> controllerFactory) {
+      final ControllerFactory<U, C> controllerFactory) {
     this.viewFactory = viewFactory;
     this.presenterFactory = presenterFactory;
     this.useCaseFactory = useCaseFactory;
     this.controllerFactory = controllerFactory;
   }
 
-  public static <V extends View> ServiceGraphWithView<V> view(final ViewFactory<V> viewFactory) {
+  static <V extends View> ServiceGraphWithView<V> view(final ViewFactory<V> viewFactory) {
     return new EmptyServiceGraph().view(viewFactory);
   }
 
-  public Controller resolve() {
+  Controller resolve() {
     final V view = viewFactory.apply();
     final P presenter = presenterFactory.apply(view);
     final U useCase = useCaseFactory.apply(presenter);
-    return controllerFactory.apply(presenter, useCase);
+    return controllerFactory.apply(useCase);
   }
 
   public interface ViewFactory<V extends View> {
@@ -48,12 +48,12 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
     U apply(final P p);
   }
 
-  public interface ControllerFactory<P extends Presenter, U extends UseCase, C extends Controller> {
+  public interface ControllerFactory<U extends UseCase, C extends Controller> {
 
-    C apply(final P presenter, final U useCase);
+    C apply(final U useCase);
   }
 
-  public static class EmptyServiceGraph {
+  private static class EmptyServiceGraph {
 
     private <V extends View> ServiceGraphWithView<V> view(final ViewFactory<V> viewFactory) {
       return new ServiceGraphWithView<>(viewFactory);
@@ -69,7 +69,7 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
       this.viewFactory = viewFactory;
     }
 
-    public <P extends Presenter> ServiceGraphWithPresenter<V, P> presenter(
+    <P extends Presenter> ServiceGraphWithPresenter<V, P> presenter(
         final PresenterFactory<V, P> presenterFactory) {
       return new ServiceGraphWithPresenter<>(viewFactory, presenterFactory);
     }
@@ -87,7 +87,7 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
       this.presenterFactory = presenterFactory;
     }
 
-    public <U extends UseCase> ServiceGraphWithPresenterAndUseCase<V, P, U> useCase(
+    <U extends UseCase> ServiceGraphWithPresenterAndUseCase<V, P, U> useCase(
         final UseCaseFactory<P, U> useCaseFactory) {
       return new ServiceGraphWithPresenterAndUseCase<>(viewFactory, presenterFactory,
           useCaseFactory);
@@ -109,8 +109,8 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
       this.useCaseFactory = useCaseFactory;
     }
 
-    public <C extends Controller> ServiceGraphController<V, P, U, C> controller(
-        final ControllerFactory<P, U, C> controllerFactory) {
+    <C extends Controller> ServiceGraphController<V, P, U, C> controller(
+        final ControllerFactory<U, C> controllerFactory) {
       return new ServiceGraphController<>(viewFactory, presenterFactory, useCaseFactory,
           controllerFactory);
     }
@@ -121,13 +121,13 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
     private final ViewFactory<V> viewFactory;
     private final PresenterFactory<V, P> presenterFactory;
     private final UseCaseFactory<P, U> useCaseFactory;
-    private final ControllerFactory<P, U, C> controllerFactory;
+    private final ControllerFactory<U, C> controllerFactory;
 
     ServiceGraphController(
         final ViewFactory<V> viewFactory,
         final PresenterFactory<V, P> presenterFactory,
         final UseCaseFactory<P, U> useCaseFactory,
-        final ControllerFactory<P, U, C> controllerFactory) {
+        final ControllerFactory<U, C> controllerFactory) {
       this.viewFactory = viewFactory;
       this.presenterFactory = presenterFactory;
       this.useCaseFactory = useCaseFactory;
