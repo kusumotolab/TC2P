@@ -24,7 +24,7 @@ public class Column {
   public String getName() {
     final SQLiteColumn sqLiteColumn = getValue();
     final String name = sqLiteColumn.name();
-    if (!name.equals(SQLiteColumn.EMPTY_NAME)) {
+    if (!name.equals(SQLiteColumn.EMPTY)) {
       return name;
     }
     return field.getName();

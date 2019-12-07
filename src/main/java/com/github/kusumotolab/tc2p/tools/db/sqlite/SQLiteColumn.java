@@ -9,13 +9,15 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface SQLiteColumn {
 
-  String EMPTY_NAME = "";
+  String EMPTY = "";
 
   int type();
 
-  String name() default EMPTY_NAME;
+  String name() default EMPTY;
 
   boolean primaryKey() default false;
 
   boolean autoIncrement() default false;
+
+  String[] indexIds() default {};
 }
