@@ -1,0 +1,179 @@
+package com.github.kusumotolab.tc2p.core.entities;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
+
+public class TreeNode {
+
+  private String key;
+  private int id;
+  private final int pos;
+  private TreeNode parentNode;
+  private final List<ActionEnum> actions;
+  private final String value;
+  private final String newValue;
+  private final String type;
+  private final List<TreeNode> children = Lists.newArrayList();
+
+  private TreeNode(final String key, final int id, final int pos, final TreeNode parentNode,
+      final List<ActionEnum> actions, final String value, final String newValue,
+      final String type) {
+    this.key = key;
+    this.id = id;
+    this.pos = pos;
+    this.parentNode = parentNode;
+    this.actions = actions;
+    this.value = value;
+    this.newValue = newValue;
+    this.type = type;
+  }
+
+  public static TreeNode createRoot(final String key, final int id, final List<ActionEnum> actions,
+      final String value, final String newValue, final String type) {
+    return new TreeNode(key, id, -1, null, actions, value, newValue, type);
+  }
+
+  public TreeNode addChild(final String key, final int id, final int pos,
+      final List<ActionEnum> actions,
+      final String value, final String newValue, final String type) {
+    final TreeNode treeNode = new TreeNode(key, id, pos, this, actions, value, newValue, type);
+    children.add(treeNode);
+    children.sort(Comparator.comparingInt(e -> e.pos));
+    return treeNode;
+  }
+
+  public TreeNodeRawObject asRaw() {
+    return new TreeNodeRawObject(key, id, pos, parentNode, actions, value, newValue, type);
+  }
+
+  public String getKey() {
+    return key;
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  public int getPos() {
+    return pos;
+  }
+
+  public TreeNode getParentNode() {
+    return parentNode;
+  }
+
+  public List<ActionEnum> getActions() {
+    return actions;
+  }
+
+  public String getValue() {
+    return value;
+  }
+
+  public String getNewValue() {
+    return newValue;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public List<TreeNode> getChildren() {
+    return children;
+  }
+
+  public List<TreeNode> getDescents() {
+    final List<TreeNode> list = Lists.newArrayList();
+    list.add(this);
+    for (final TreeNode child : children) {
+      list.addAll(child.getDescents());
+    }
+    return list;
+  }
+
+  public void fixId() {
+    fixId(0);
+  }
+
+  private int fixId(int id) {
+    final String str = String.valueOf(this.id);
+    final int index = this.key.lastIndexOf(str);
+    this.key = this.key.substring(0, index) + id;
+
+    this.id = id;
+    int nextId = id + 1;
+    for (final TreeNode child : children) {
+      nextId = child.fixId(nextId);
+    }
+    return nextId;
+  }
+
+  public TreeNode compactAndGetNewRootNode() {
+    return this.compactAndGetNewRootNode(false);
+  }
+
+  /*
+   - 上に何もない -> childrenの圧縮はする
+      - 子が一つ -> その子がroot
+      - 子が複数 -> 自分がroot
+   - 上がmov　-> 無条件で全て残して、自分がroot
+   - 上がupd -> childrenの圧縮はして、自分がroot
+   */
+  private TreeNode compactAndGetNewRootNode(final boolean isInUpdate) {
+
+    final boolean hasUpd = actions.contains(ActionEnum.UPD);
+    final boolean hasMove = actions.contains(ActionEnum.SRC_MOV) || actions.contains(ActionEnum.DST_MOVE);
+
+    if (hasMove) {
+      return this;
+    }
+
+    final List<TreeNode> removedChildren = children.stream()
+        .filter(e -> !e.hasAction())
+        .collect(Collectors.toList());
+    removedChildren.forEach(e -> e.parentNode = null);
+    children.removeAll(removedChildren);
+
+    if (isInUpdate) {
+      for (final TreeNode child : children) {
+        child.compactAndGetNewRootNode(true);
+      }
+      return this;
+    }
+
+    if (children.size() == 1 ) {
+      final TreeNode child = children.get(0);
+      return child.compactAndGetNewRootNode(hasUpd);
+    }
+
+    for (final TreeNode child : children) {
+      child.compactAndGetNewRootNode(hasUpd);
+    }
+
+    return this;
+  }
+
+  private Boolean cache_hasAction;
+
+  private boolean hasAction() {
+    if (cache_hasAction != null) {
+      return cache_hasAction;
+    }
+
+    if (!actions.isEmpty()) {
+      cache_hasAction = true;
+      return true;
+    }
+    for (final TreeNode child : children) {
+      final boolean childHasAction = child.hasAction();
+      if (childHasAction) {
+        cache_hasAction = true;
+        return true;
+      }
+    }
+    cache_hasAction = false;
+    return false;
+  }
+}
