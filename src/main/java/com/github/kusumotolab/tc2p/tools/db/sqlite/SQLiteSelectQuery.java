@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.github.kusumotolab.tc2p.tools.db.Query;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class SQLiteSelectQuery<T> implements Query<T> {
 
   public static final String COMMAND = "SELECT";
@@ -18,23 +20,7 @@ public class SQLiteSelectQuery<T> implements Query<T> {
   private final List<SQLiteOrder> orders;
   private final List<String> groupsBys;
   private final SQLiteCondition having;
-
   private final Function<ResultSet, T> mapper;
-
-  public SQLiteSelectQuery(final String dbName, final List<String> columns,
-      final SQLiteCondition where, final Integer limit, final Integer offset,
-      final List<SQLiteOrder> orders, final List<String> groupsBys, final SQLiteCondition having,
-      final Function<ResultSet, T> mapper) {
-    this.dbName = dbName;
-    this.columns = columns;
-    this.where = where;
-    this.limit = limit;
-    this.offset = offset;
-    this.orders = orders;
-    this.groupsBys = groupsBys;
-    this.having = having;
-    this.mapper = mapper;
-  }
 
   @Override
   public String toCommand() {

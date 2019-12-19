@@ -9,7 +9,11 @@ import java.util.stream.Stream;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteColumn;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import com.google.common.collect.Lists;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class EditScript extends SQLiteObject {
 
   @SQLiteColumn(type = Types.INTEGER, primaryKey = true, autoIncrement = true)
@@ -62,85 +66,5 @@ public class EditScript extends SQLiteObject {
           .collect(Collectors.toList());
     }
     return super.decodeField(value, field);
-  }
-
-  public int getId() {
-    return id;
-  }
-
-  public void setId(final int id) {
-    this.id = id;
-  }
-
-  public String getSrcCommitID() {
-    return srcCommitID;
-  }
-
-  public void setSrcCommitID(final String srcCommitID) {
-    this.srcCommitID = srcCommitID;
-  }
-
-  public String getSrcCommitMessage() {
-    return srcCommitMessage;
-  }
-
-  public void setSrcCommitMessage(final String srcCommitMessage) {
-    this.srcCommitMessage = srcCommitMessage;
-  }
-
-  public String getDstCommitID() {
-    return dstCommitID;
-  }
-
-  public void setDstCommitID(final String dstCommitID) {
-    this.dstCommitID = dstCommitID;
-  }
-
-  public String getDstCommitMessage() {
-    return dstCommitMessage;
-  }
-
-  public void setDstCommitMessage(final String dstCommitMessage) {
-    this.dstCommitMessage = dstCommitMessage;
-  }
-
-  public String getSrcName() {
-    return srcName;
-  }
-
-  public void setSrcName(final String srcName) {
-    this.srcName = srcName;
-  }
-
-  public String getDstName() {
-    return dstName;
-  }
-
-  public void setDstName(final String dstName) {
-    this.dstName = dstName;
-  }
-
-  public List<String> getTreeNodeKeys() {
-    return treeNodeKeys;
-  }
-
-  public void settTreeNodeIds(final List<String> treeNodeKeys) {
-    this.treeNodeKeys = treeNodeKeys;
-  }
-
-  public String getProjectName() {
-    return projectName;
-  }
-
-  public void setProjectName(final String projectName) {
-    this.projectName = projectName;
-  }
-
-  public List<TreeNode> getTreeNodes() {
-    return treeNodes;
-  }
-
-  public void setTreeNodes(final List<TreeNode> treeNodes) {
-    this.treeNodes = treeNodes;
   }
 }

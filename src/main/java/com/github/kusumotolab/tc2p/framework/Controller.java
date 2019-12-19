@@ -1,7 +1,7 @@
 package com.github.kusumotolab.tc2p.framework;
 
 
-public abstract class Controller<U extends UseCase> {
+public abstract class Controller<V extends View, P extends Presenter<V>, U extends UseCase<?, V, P>> {
 
   protected final U useCase;
 
@@ -9,6 +9,6 @@ public abstract class Controller<U extends UseCase> {
     this.useCase = useCase;
   }
 
-  public abstract void exec(final String args[]);
+  public abstract void exec(final String[] args);
 }
 

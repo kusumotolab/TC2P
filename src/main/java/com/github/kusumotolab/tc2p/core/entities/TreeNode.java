@@ -4,18 +4,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
+import lombok.Getter;
 
 public class TreeNode {
 
-  private String key;
-  private int id;
-  private final int pos;
-  private TreeNode parentNode;
-  private final List<ActionEnum> actions;
-  private final String value;
-  private final String newValue;
-  private final String type;
-  private final List<TreeNode> children = Lists.newArrayList();
+  @Getter private String key;
+  @Getter private int id;
+  @Getter private final int pos;
+  @Getter private TreeNode parentNode;
+  @Getter private final List<ActionEnum> actions;
+  @Getter private final String value;
+  @Getter private final String newValue;
+  @Getter private final String type;
+  @Getter private final List<TreeNode> children = Lists.newArrayList();
 
   private TreeNode(final String key, final int id, final int pos, final TreeNode parentNode,
       final List<ActionEnum> actions, final String value, final String newValue,
@@ -46,42 +47,6 @@ public class TreeNode {
 
   public TreeNodeRawObject asRaw() {
     return new TreeNodeRawObject(key, id, pos, parentNode, actions, value, newValue, type);
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  public int getId() {
-    return id;
-  }
-
-  public int getPos() {
-    return pos;
-  }
-
-  public TreeNode getParentNode() {
-    return parentNode;
-  }
-
-  public List<ActionEnum> getActions() {
-    return actions;
-  }
-
-  public String getValue() {
-    return value;
-  }
-
-  public String getNewValue() {
-    return newValue;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public List<TreeNode> getChildren() {
-    return children;
   }
 
   public List<TreeNode> getDescents() {

@@ -12,7 +12,7 @@ public class ServiceProvider {
 
   private static final ServiceProvider instance = new ServiceProvider();
 
-  private final Map<String, ServiceGraph> graphs = new HashMap<>();
+  private final Map<String, ServiceGraph<?, ?, ?, ?>> graphs = new HashMap<>();
 
   private ServiceProvider() {
     final ConfigurationBuilder configuration = new ConfigurationBuilder()
@@ -25,7 +25,7 @@ public class ServiceProvider {
           try {
             field.setAccessible(true);
             final Service service = field.getAnnotation(Service.class);
-            final ServiceGraph serviceGraph = (ServiceGraph) field.get(Services.getInstance());
+            final ServiceGraph<?, ?, ?, ?> serviceGraph = (ServiceGraph<?, ?, ?, ?>) field.get(Services.getInstance());
             graphs.put(service.name(), serviceGraph);
           } catch (final IllegalAccessException e) {
             e.printStackTrace();
@@ -37,8 +37,8 @@ public class ServiceProvider {
     return instance;
   }
 
-  public Controller resolve(final String key) {
-    final ServiceGraph graph = graphs.get(key);
+  public Controller<?, ?, ?> resolve(final String key) {
+    final ServiceGraph<?, ?, ?, ?> graph = graphs.get(key);
     if (graph == null) {
       return null;
     }

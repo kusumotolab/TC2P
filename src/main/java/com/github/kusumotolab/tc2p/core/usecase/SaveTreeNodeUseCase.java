@@ -7,10 +7,11 @@ import com.github.kusumotolab.tc2p.core.entities.FileHistory;
 import com.github.kusumotolab.tc2p.core.presenter.IMiningPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.GumTreeExecutor;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.MiningInteractor;
+import com.github.kusumotolab.tc2p.framework.View;
 import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeOutput;
 import io.reactivex.Observable;
 
-public class SaveTreeNodeUseCase<P extends IMiningPresenter<?>> extends IMiningUseCase<P> {
+public class SaveTreeNodeUseCase<V extends View, P extends IMiningPresenter<V>> extends IMiningUseCase<V, P> {
 
   public SaveTreeNodeUseCase(final P presenter) {
     super(presenter);

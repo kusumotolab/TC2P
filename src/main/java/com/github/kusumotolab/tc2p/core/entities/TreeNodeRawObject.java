@@ -9,35 +9,43 @@ import java.util.stream.Collectors;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteColumn;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import com.google.common.collect.Lists;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class TreeNodeRawObject extends SQLiteObject {
 
+  @Getter
   @SQLiteColumn(type = Types.CHAR, primaryKey = true)
   private String key;
 
+  @Getter
   @SQLiteColumn(type = Types.INTEGER)
   private int id;
 
+  @Getter
   @SQLiteColumn(type = Types.INTEGER)
   private int pos;
 
+  @Getter
   @SQLiteColumn(type = Types.INTEGER, name = "parent_node_id")
   private int parentNodeId;
 
+  @Getter
   @SQLiteColumn(type = Types.CHAR, name = "action_name")
   private List<ActionEnum> actions;
 
+  @Getter
   @SQLiteColumn(type = Types.CHAR)
   private String value;
 
+  @Getter
   @SQLiteColumn(type = Types.CHAR, name = "new_value")
   private String newValue;
 
+  @Getter
   @SQLiteColumn(type = Types.CHAR)
   private String type;
-
-  public TreeNodeRawObject() {
-  }
 
   public TreeNodeRawObject(final String key, final int id, final int pos, final TreeNode parentNode,
       final List<ActionEnum> actions, final String value, final String newValue,
@@ -84,37 +92,5 @@ public class TreeNodeRawObject extends SQLiteObject {
     return Arrays.stream(((String) value).split(","))
         .map(ActionEnum::valueOf)
         .collect(Collectors.toList());
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  public int getId() {
-    return id;
-  }
-
-  public int getPos() {
-    return pos;
-  }
-
-  public int getParentNodeId() {
-    return parentNodeId;
-  }
-
-  public List<ActionEnum> getActions() {
-    return actions;
-  }
-
-  public String getValue() {
-    return value;
-  }
-
-  public String getNewValue() {
-    return newValue;
-  }
-
-  public String getType() {
-    return type;
   }
 }

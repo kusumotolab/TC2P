@@ -7,6 +7,7 @@ import org.eclipse.jgit.treewalk.filter.PathFilter;
 import com.github.kusumotolab.tc2p.tools.git.GitCatBlob.GitBlobInput;
 import com.github.kusumotolab.tc2p.utils.Try;
 import io.reactivex.Maybe;
+import lombok.Data;
 
 public class GitCatBlob extends GitCommand<GitBlobInput, Maybe<String>> {
 
@@ -31,22 +32,9 @@ public class GitCatBlob extends GitCommand<GitBlobInput, Maybe<String>> {
         });
   }
 
+  @Data
   public static class GitBlobInput {
-
     private final String path;
     private final RevCommit commit;
-
-    public GitBlobInput(final String path, final RevCommit commit) {
-      this.path = path;
-      this.commit = commit;
-    }
-
-    public String getPath() {
-      return path;
-    }
-
-    public RevCommit getCommit() {
-      return commit;
-    }
   }
 }

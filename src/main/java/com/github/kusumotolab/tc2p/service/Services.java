@@ -8,7 +8,7 @@ import com.github.kusumotolab.tc2p.core.view.ConsoleView;
 public class Services {
 
   @Service(name = "preprocess")
-  private static final ServiceGraph preprocess = ServiceGraph.view(ConsoleView::new)
+  private static final ServiceGraph<?, ?, ?, ?> preprocess = ServiceGraph.view(ConsoleView::new)
       .presenter(MiningPresenter::new)
       .useCase(SaveTreeNodeUseCase::new)
       .controller(MiningController::new)

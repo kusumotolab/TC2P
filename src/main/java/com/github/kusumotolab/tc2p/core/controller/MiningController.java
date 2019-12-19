@@ -1,6 +1,5 @@
 package com.github.kusumotolab.tc2p.core.controller;
 
-import java.nio.file.Paths;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import com.github.kusumotolab.tc2p.core.configuration.MiningConfiguration;
@@ -8,10 +7,11 @@ import com.github.kusumotolab.tc2p.core.presenter.IMiningPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.IMiningUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.IMiningUseCase.Input;
 import com.github.kusumotolab.tc2p.framework.Controller;
+import com.github.kusumotolab.tc2p.framework.View;
 
-public class MiningController<P extends IMiningPresenter>  extends Controller<IMiningUseCase<P>> {
+public class MiningController<V extends View, P extends IMiningPresenter<V>, U extends IMiningUseCase<V, P>>  extends Controller<V, P, U> {
 
-  public MiningController(final IMiningUseCase<P> useCase) {
+  public MiningController(final U useCase) {
     super(useCase);
   }
 
@@ -21,9 +21,8 @@ public class MiningController<P extends IMiningPresenter>  extends Controller<IM
     final CmdLineParser parser = new CmdLineParser(configuration);
     try {
       parser.parseArgument(args);
-      useCase.execute(new Input(Paths.get(configuration.getRepository())));
+      useCase.execute(new Input(configuration.getRepository()));
     } catch (final CmdLineException e) {
-      e.printStackTrace();
       parser.printUsage(System.err);
     }
   }

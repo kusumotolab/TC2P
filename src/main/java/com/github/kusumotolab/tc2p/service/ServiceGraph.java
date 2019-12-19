@@ -1,21 +1,20 @@
 package com.github.kusumotolab.tc2p.service;
 
-
 import com.github.kusumotolab.tc2p.framework.Controller;
 import com.github.kusumotolab.tc2p.framework.Presenter;
 import com.github.kusumotolab.tc2p.framework.UseCase;
 import com.github.kusumotolab.tc2p.framework.View;
 
-public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase, C extends Controller> {
+public class ServiceGraph<V extends View, P extends Presenter<V>, U extends UseCase<?, V, P>, C extends Controller<V, P, U>> {
 
   private final ViewFactory<V> viewFactory;
   private final PresenterFactory<V, P> presenterFactory;
-  private final UseCaseFactory<P, U> useCaseFactory;
-  private final ControllerFactory<U, C> controllerFactory;
+  private final UseCaseFactory<V, P, U> useCaseFactory;
+  private final ControllerFactory<V, P, U, C> controllerFactory;
 
   private ServiceGraph(final ViewFactory<V> viewFactory,
-      final PresenterFactory<V, P> presenterFactory, final UseCaseFactory<P, U> useCaseFactory,
-      final ControllerFactory<U, C> controllerFactory) {
+      final PresenterFactory<V, P> presenterFactory, final UseCaseFactory<V, P, U> useCaseFactory,
+      final ControllerFactory<V, P, U, C> controllerFactory) {
     this.viewFactory = viewFactory;
     this.presenterFactory = presenterFactory;
     this.useCaseFactory = useCaseFactory;
@@ -26,7 +25,7 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
     return new EmptyServiceGraph().view(viewFactory);
   }
 
-  Controller resolve() {
+  C resolve() {
     final V view = viewFactory.apply();
     final P presenter = presenterFactory.apply(view);
     final U useCase = useCaseFactory.apply(presenter);
@@ -38,17 +37,17 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
     V apply();
   }
 
-  public interface PresenterFactory<V extends View, P extends Presenter> {
+  public interface PresenterFactory<V extends View, P extends Presenter<V>> {
 
     P apply(final V view);
   }
 
-  public interface UseCaseFactory<P extends Presenter, U extends UseCase> {
+  public interface UseCaseFactory<V extends View, P extends Presenter<V>, U extends UseCase<?, V, P>> {
 
     U apply(final P p);
   }
 
-  public interface ControllerFactory<U extends UseCase, C extends Controller> {
+  public interface ControllerFactory<V extends View, P extends Presenter<V>, U extends UseCase<?, V, P>, C extends Controller<V, P, U>> {
 
     C apply(final U useCase);
   }
@@ -69,13 +68,13 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
       this.viewFactory = viewFactory;
     }
 
-    <P extends Presenter> ServiceGraphWithPresenter<V, P> presenter(
+    <P extends Presenter<V>> ServiceGraphWithPresenter<V, P> presenter(
         final PresenterFactory<V, P> presenterFactory) {
       return new ServiceGraphWithPresenter<>(viewFactory, presenterFactory);
     }
   }
 
-  public static class ServiceGraphWithPresenter<V extends View, P extends Presenter> {
+  public static class ServiceGraphWithPresenter<V extends View, P extends Presenter<V>> {
 
     private final ViewFactory<V> viewFactory;
     private final PresenterFactory<V, P> presenterFactory;
@@ -87,56 +86,55 @@ public class ServiceGraph<V extends View, P extends Presenter, U extends UseCase
       this.presenterFactory = presenterFactory;
     }
 
-    <U extends UseCase> ServiceGraphWithPresenterAndUseCase<V, P, U> useCase(
-        final UseCaseFactory<P, U> useCaseFactory) {
+    <U extends UseCase<?, V, P>> ServiceGraphWithPresenterAndUseCase<V, P, U> useCase(
+        final UseCaseFactory<V, P, U> useCaseFactory) {
       return new ServiceGraphWithPresenterAndUseCase<>(viewFactory, presenterFactory,
           useCaseFactory);
     }
   }
 
-  public static class ServiceGraphWithPresenterAndUseCase<V extends View, P extends Presenter, U extends UseCase> {
+  public static class ServiceGraphWithPresenterAndUseCase<V extends View, P extends Presenter<V>, U extends UseCase<?, V, P>> {
 
     private final ViewFactory<V> viewFactory;
     private final PresenterFactory<V, P> presenterFactory;
-    private final UseCaseFactory<P, U> useCaseFactory;
+    private final UseCaseFactory<V, P, U> useCaseFactory;
 
     ServiceGraphWithPresenterAndUseCase(
         final ViewFactory<V> viewFactory,
         final PresenterFactory<V, P> presenterFactory,
-        final UseCaseFactory<P, U> useCaseFactory) {
+        final UseCaseFactory<V, P, U> useCaseFactory) {
       this.viewFactory = viewFactory;
       this.presenterFactory = presenterFactory;
       this.useCaseFactory = useCaseFactory;
     }
 
-    <C extends Controller> ServiceGraphController<V, P, U, C> controller(
-        final ControllerFactory<U, C> controllerFactory) {
+    <C extends Controller<V, P, U>> ServiceGraphController<V, P, U, C> controller(
+        final ControllerFactory<V, P, U, C> controllerFactory) {
       return new ServiceGraphController<>(viewFactory, presenterFactory, useCaseFactory,
           controllerFactory);
     }
   }
 
-  public static class ServiceGraphController<V extends View, P extends Presenter, U extends UseCase, C extends Controller> {
+  public static class ServiceGraphController<V extends View, P extends Presenter<V>, U extends UseCase<?, V, P>, C extends Controller<V, P, U>> {
 
     private final ViewFactory<V> viewFactory;
     private final PresenterFactory<V, P> presenterFactory;
-    private final UseCaseFactory<P, U> useCaseFactory;
-    private final ControllerFactory<U, C> controllerFactory;
+    private final UseCaseFactory<V, P, U> useCaseFactory;
+    private final ControllerFactory<V, P, U, C> controllerFactory;
 
     ServiceGraphController(
         final ViewFactory<V> viewFactory,
         final PresenterFactory<V, P> presenterFactory,
-        final UseCaseFactory<P, U> useCaseFactory,
-        final ControllerFactory<U, C> controllerFactory) {
+        final UseCaseFactory<V, P, U> useCaseFactory,
+        final ControllerFactory<V, P, U, C> controllerFactory) {
       this.viewFactory = viewFactory;
       this.presenterFactory = presenterFactory;
       this.useCaseFactory = useCaseFactory;
       this.controllerFactory = controllerFactory;
     }
 
-    @SuppressWarnings("unchecked")
-    public ServiceGraph resolve() {
-      return new ServiceGraph(viewFactory, presenterFactory, useCaseFactory, controllerFactory);
+    public ServiceGraph<V, P, U, C> resolve() {
+      return new ServiceGraph<>(viewFactory, presenterFactory, useCaseFactory, controllerFactory);
     }
   }
 }

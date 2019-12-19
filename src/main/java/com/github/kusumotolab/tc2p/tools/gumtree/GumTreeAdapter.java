@@ -25,7 +25,7 @@ public class GumTreeAdapter {
           final Maybe<String> srcContents = getContents(srcCommitLog, gitClient);
           final Maybe<String> dstContents = getContents(dstCommitLog, gitClient);
 
-          return new GumTreeInput(srcCommitLog.getFileName(), dstCommitLog.getFileName(),
+          return createGumTreeInput(srcCommitLog.getFileName(), dstCommitLog.getFileName(),
               srcContents.blockingGet(), dstContents.blockingGet());
         });
   }
@@ -39,5 +39,10 @@ public class GumTreeAdapter {
         .map(content ->
             filePath.endsWith(".java") ? content
                 : filePath.endsWith(".mjava") ? "class XXX { " + content + "}" : "class XXX {}");
+  }
+
+  private GumTreeInput createGumTreeInput(final Path srcPath, final Path dstPath,
+      final String srcContents, final String dstContents) {
+    return new GumTreeInput(srcPath.toString(), dstPath.toString(), srcContents, dstContents);
   }
 }
