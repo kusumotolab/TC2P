@@ -8,20 +8,36 @@ import lombok.Getter;
 
 public class TreeNode {
 
-  @Getter private String key;
-  @Getter private int id;
-  @Getter private final int pos;
-  @Getter private TreeNode parentNode;
-  @Getter private final List<ActionEnum> actions;
-  @Getter private final String value;
-  @Getter private final String newValue;
-  @Getter private final String type;
-  @Getter private final List<TreeNode> children = Lists.newArrayList();
+  @Getter
+  private String projectName;
+  @Getter
+  private String srcCommitId;
+  @Getter
+  private String dstCommitId;
+  @Getter
+  private int id;
+  @Getter
+  private final int pos;
+  @Getter
+  private TreeNode parentNode;
+  @Getter
+  private final List<ActionEnum> actions;
+  @Getter
+  private final String value;
+  @Getter
+  private final String newValue;
+  @Getter
+  private final String type;
+  @Getter
+  private final List<TreeNode> children = Lists.newArrayList();
+  private Boolean cache_hasAction;
 
-  private TreeNode(final String key, final int id, final int pos, final TreeNode parentNode,
-      final List<ActionEnum> actions, final String value, final String newValue,
-      final String type) {
-    this.key = key;
+  public TreeNode(final String projectName, final String srcCommitId, final String dstCommitId,
+      final int id, final int pos, final TreeNode parentNode, final List<ActionEnum> actions,
+      final String value, final String newValue, final String type) {
+    this.projectName = projectName;
+    this.srcCommitId = srcCommitId;
+    this.dstCommitId = dstCommitId;
     this.id = id;
     this.pos = pos;
     this.parentNode = parentNode;
@@ -31,22 +47,25 @@ public class TreeNode {
     this.type = type;
   }
 
-  public static TreeNode createRoot(final String key, final int id, final List<ActionEnum> actions,
-      final String value, final String newValue, final String type) {
-    return new TreeNode(key, id, -1, null, actions, value, newValue, type);
+  public static TreeNode createRoot(final String projectName, final String srcCommitId,
+      final String dstCommitId, final int id, final List<ActionEnum> actions, final String value,
+      final String newValue, final String type) {
+    return new TreeNode(projectName, srcCommitId, dstCommitId, id, -1, null, actions, value,
+        newValue, type);
   }
 
-  public TreeNode addChild(final String key, final int id, final int pos,
-      final List<ActionEnum> actions,
+  public TreeNode addChild(final int id, final int pos, final List<ActionEnum> actions,
       final String value, final String newValue, final String type) {
-    final TreeNode treeNode = new TreeNode(key, id, pos, this, actions, value, newValue, type);
+    final TreeNode treeNode = new TreeNode(projectName, srcCommitId, dstCommitId, id, pos, this,
+        actions, value, newValue, type);
     children.add(treeNode);
     children.sort(Comparator.comparingInt(e -> e.pos));
     return treeNode;
   }
 
   public TreeNodeRawObject asRaw() {
-    return new TreeNodeRawObject(key, id, pos, parentNode, actions, value, newValue, type);
+    return new TreeNodeRawObject(projectName, srcCommitId, dstCommitId, id, pos, parentNode,
+        actions, value, newValue, type);
   }
 
   public List<TreeNode> getDescents() {
@@ -63,10 +82,6 @@ public class TreeNode {
   }
 
   private int fixId(int id) {
-    final String str = String.valueOf(this.id);
-    final int index = this.key.lastIndexOf(str);
-    this.key = this.key.substring(0, index) + id;
-
     this.id = id;
     int nextId = id + 1;
     for (final TreeNode child : children) {
@@ -89,7 +104,8 @@ public class TreeNode {
   private TreeNode compactAndGetNewRootNode(final boolean isInUpdate) {
 
     final boolean hasUpd = actions.contains(ActionEnum.UPD);
-    final boolean hasMove = actions.contains(ActionEnum.SRC_MOV) || actions.contains(ActionEnum.DST_MOVE);
+    final boolean hasMove =
+        actions.contains(ActionEnum.SRC_MOV) || actions.contains(ActionEnum.DST_MOVE);
 
     if (hasMove) {
       return this;
@@ -108,7 +124,7 @@ public class TreeNode {
       return this;
     }
 
-    if (children.size() == 1 ) {
+    if (children.size() == 1) {
       final TreeNode child = children.get(0);
       return child.compactAndGetNewRootNode(hasUpd);
     }
@@ -119,8 +135,6 @@ public class TreeNode {
 
     return this;
   }
-
-  private Boolean cache_hasAction;
 
   private boolean hasAction() {
     if (cache_hasAction != null) {

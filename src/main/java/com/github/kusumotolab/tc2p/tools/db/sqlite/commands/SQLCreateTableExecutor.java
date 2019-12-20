@@ -14,7 +14,9 @@ import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.reactivex.Completable;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class SQLCreateTableExecutor extends SQLCommandExecutor {
 
   public SQLCreateTableExecutor(final SQLite sqLite) {
@@ -31,16 +33,40 @@ public class SQLCreateTableExecutor extends SQLCommandExecutor {
 
   private <Model extends SQLiteObject> void createTable(final Class<Model> modelClass)
       throws SQLException {
-    final List<String> columnNames = SQLiteObject.getColumns(modelClass)
-        .stream()
-        .map(Column::toString)
+    final List<Column> columns = SQLiteObject.getColumns(modelClass);
+    final List<String> primaryKeys = columns.stream()
+        .filter(column -> column.getValue()
+            .primaryKey())
+        .map(e -> e.getName())
         .collect(Collectors.toList());
 
-    final String command = "CREATE TABLE IF NOT EXISTS "
+    final List<String> columnNames = columns
+        .stream()
+        .map(column -> {
+          final SQLiteColumn value = column.getValue();
+          String columnText = column.toString();
+          if (value.primaryKey() && primaryKeys.size() == 1) {
+            columnText += " PRIMARY KEY";
+          }
+          if (value.autoIncrement()) {
+            columnText += " AUTOINCREMENT";
+          }
+          return columnText;
+        })
+        .collect(Collectors.toList());
+
+    String command = "CREATE TABLE IF NOT EXISTS "
         + SQLiteObject.getDBName(modelClass)
         + " ("
-        + String.join(", ", columnNames)
-        + ")";
+        + String.join(", ", columnNames);
+    if (2 <= primaryKeys.size()) {
+      command += ", PRIMARY KEY ("
+          + String.join(",", primaryKeys)
+          + ")";
+    }
+    command += ")";
+    log.debug(command);
+
     final Statement statement = sqLite.getConnection()
         .createStatement();
     statement.executeUpdate(command);

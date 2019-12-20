@@ -10,6 +10,7 @@ public class JavaFileDetector {
 
   public static Stream<Path> execute(final Path path) {
     return FileDetector.execute(path)
+        .filter(e -> e.toFile().isFile())
         .filter(e -> e.toString()
             .endsWith("java"));
   }

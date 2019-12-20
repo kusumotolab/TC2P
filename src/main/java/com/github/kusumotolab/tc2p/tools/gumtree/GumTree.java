@@ -37,7 +37,7 @@ public class GumTree {
     return new GumTreeOutput(input, srcTreeContext, dstTreeContext, matcher.getMappings(), actions);
   }
 
-  public TreeContext getTreeContext(final String content) throws IOException {
+  private TreeContext getTreeContext(final String content) throws IOException {
     return new JdtTreeGenerator().generateFromString(content);
   }
 }

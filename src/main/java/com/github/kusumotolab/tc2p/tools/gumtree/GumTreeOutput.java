@@ -8,7 +8,6 @@ import lombok.Data;
 
 @Data
 public class GumTreeOutput {
-
   private final GumTreeInput input;
   private final TreeContext srcTreeContext;
   private final TreeContext dstTreeContext;

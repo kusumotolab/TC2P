@@ -9,4 +9,14 @@ public class CommitLog {
 
   private final RevCommit commit;
   private final Path fileName;
+
+  public String getCommitId() {
+    return getCommit()
+        .getId()
+        .toString();
+  }
+
+  public String getCommitMessage() {
+    return getCommit().getFullMessage();
+  }
 }

@@ -34,15 +34,6 @@ public class Column {
   public String toString() {
     final SQLiteColumn value = getValue();
     final JDBCType type = JDBCType.valueOf(value.type());
-    final StringBuilder stringBuilder = new StringBuilder(getName()).append(" ")
-        .append(type.getName());
-    if (value.primaryKey()) {
-      stringBuilder.append(" PRIMARY KEY");
-    }
-
-    if (value.autoIncrement()) {
-      stringBuilder.append(" AUTOINCREMENT");
-    }
-    return stringBuilder.toString();
+    return getName() + " " + type.getName();
   }
 }

@@ -40,29 +40,30 @@ public class EditScript extends SQLiteObject {
   @SQLiteColumn(type = Types.CHAR, name = "project_name", indexIds = {"project_name_index"})
   private String projectName;
 
-  @SQLiteColumn(type = Types.CHAR, name = "tree_node_keys")
-  private List<String> treeNodeKeys;
+  @SQLiteColumn(type = Types.CHAR, name = "tree_node_ids")
+  private List<Integer> treeNodeIds = Lists.newArrayList();
 
-  private List<TreeNode> treeNodes = new ArrayList<>();
+  private List<TreeNode> treeNodes = Lists.newArrayList();
 
   @Override
   protected Object encodeField(final Object value, final Field field) {
-    if (field.getName().equals("treeNodeKeys")) {
-      final List<String> ids = treeNodeKeys.stream()
-          .map(String::valueOf)
+    if (field.getName().equals("treeNodeIds")) {
+      final List<String> ids = treeNodeIds.stream()
+          .map(Object::toString)
           .collect(Collectors.toList());
-      return String.join(" & ", ids);
+      return String.join("&", ids);
     }
     return super.encodeField(value, field);
   }
 
   @Override
   public Object decodeField(final Object value, final Field field) {
-    if (field.getName().equals("treeNodeKeys")) {
+    if (field.getName().equals("treeNodeIds")) {
       if (value.equals("")) {
         return Lists.newArrayList();
       }
-      return Stream.of(((String) value).split(" & "))
+      return Stream.of(((String) value).split("&"))
+          .map(Integer::parseInt)
           .collect(Collectors.toList());
     }
     return super.decodeField(value, field);

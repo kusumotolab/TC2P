@@ -8,4 +8,8 @@ public abstract class IMiningPresenter<V extends View> extends Presenter<V> {
   public IMiningPresenter(final V view) {
     super(view);
   }
+
+  public abstract void start();
+
+  public abstract void end();
 }

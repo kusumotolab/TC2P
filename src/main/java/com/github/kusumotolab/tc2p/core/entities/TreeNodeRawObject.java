@@ -16,18 +16,25 @@ import lombok.NoArgsConstructor;
 public class TreeNodeRawObject extends SQLiteObject {
 
   @Getter
-  @SQLiteColumn(type = Types.CHAR, primaryKey = true)
-  private String key;
+  @SQLiteColumn(type = Types.CHAR, name = "project_name", primaryKey = true)
+  private String projectName;
 
   @Getter
-  @SQLiteColumn(type = Types.INTEGER)
+  @SQLiteColumn(type = Types.CHAR, name = "src_commit", primaryKey = true)
+  private String srcCommitId;
+
+  @Getter
+  @SQLiteColumn(type = Types.CHAR, name = "dst_commit_id", primaryKey = true)
+  private String dstCommitId;
+
+  @Getter
+  @SQLiteColumn(type = Types.INTEGER, primaryKey = true)
   private int id;
 
   @Getter
   @SQLiteColumn(type = Types.INTEGER)
   private int pos;
 
-  @Getter
   @SQLiteColumn(type = Types.INTEGER, name = "parent_node_id")
   private int parentNodeId;
 
@@ -47,10 +54,14 @@ public class TreeNodeRawObject extends SQLiteObject {
   @SQLiteColumn(type = Types.CHAR)
   private String type;
 
-  public TreeNodeRawObject(final String key, final int id, final int pos, final TreeNode parentNode,
+  public TreeNodeRawObject(final String projectName, final String srcCommitId,
+      final String dstCommitId, final int id,
+      final int pos, final TreeNode parentNode,
       final List<ActionEnum> actions, final String value, final String newValue,
       final String type) {
-    this.key = key;
+    this.projectName = projectName;
+    this.srcCommitId = srcCommitId;
+    this.dstCommitId = dstCommitId;
     this.id = id;
     this.pos = pos;
     this.parentNodeId = parentNode != null ? parentNode.getId() : -1;
@@ -62,10 +73,11 @@ public class TreeNodeRawObject extends SQLiteObject {
 
   public TreeNode asTreeNode(final Function<Integer, TreeNode> resolver) {
     if (pos == -1) {
-      return TreeNode.createRoot(key, id, actions, value, newValue, type);
+      return TreeNode.createRoot(projectName, srcCommitId, dstCommitId, id, actions, value,
+          newValue, type);
     }
     final TreeNode parentNode = resolver.apply(parentNodeId);
-    return parentNode.addChild(key, id, pos, actions, value, newValue, type);
+    return parentNode.addChild(id, pos, actions, value, newValue, type);
   }
 
   @Override

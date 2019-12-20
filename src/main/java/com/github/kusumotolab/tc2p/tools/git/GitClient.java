@@ -20,7 +20,7 @@ public class GitClient {
   }
 
   public static Optional<GitClient> create(final Path path) {
-    return Try.optional(() -> new GitClient(path));
+    return Try.optional(() -> new GitClient(path.resolve(".git")));
   }
 
   public Observable<CommitLog> logWithFollow(final Path filePath) {

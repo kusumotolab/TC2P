@@ -9,8 +9,9 @@
 	</appender>
 
 	<logger name="org.reflections" level="OFF"/>
+	<logger name="org.eclipse.jgit" level="OFF"/>s
 
 	<root level="DEBUG">
-	  	<appender-ref ref="STDOUT" />
+		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>

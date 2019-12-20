@@ -34,6 +34,7 @@ public class GitCatBlob extends GitCommand<GitBlobInput, Maybe<String>> {
 
   @Data
   public static class GitBlobInput {
+
     private final String path;
     private final RevCommit commit;
   }

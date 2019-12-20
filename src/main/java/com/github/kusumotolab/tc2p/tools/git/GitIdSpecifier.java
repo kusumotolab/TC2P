@@ -1,5 +1,6 @@
 package com.github.kusumotolab.tc2p.tools.git;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -22,6 +23,8 @@ public class GitIdSpecifier extends GitCommand<Consumer<TreeWalk>, Maybe<ObjectI
         }
         final ObjectId objectId = treeWalk.getObjectId(0);
         emitter.onSuccess(objectId);
+      } catch (final Exception e) {
+        emitter.onError(e);
       }
     });
   }
