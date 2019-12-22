@@ -8,6 +8,6 @@ import lombok.Getter;
 public class MiningConfiguration {
 
   @Getter
-  @Option(name = "-r", aliases = "--repository", usage = "the repository path", handler = PathOptionHandler.class)
+  @Option(name = "-r", aliases = "--repository", usage = "the repository path", handler = PathOptionHandler.class, required = true)
   private Path repository;
 }

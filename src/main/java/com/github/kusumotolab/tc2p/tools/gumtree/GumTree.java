@@ -10,7 +10,9 @@ import com.github.gumtreediff.matchers.Matchers;
 import com.github.gumtreediff.tree.ITree;
 import com.github.gumtreediff.tree.TreeContext;
 import com.github.kusumotolab.tc2p.tools.gumtree.jdt.JdtTreeGenerator;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class GumTree {
 
   private final GumTreeInput input;
@@ -20,6 +22,9 @@ public class GumTree {
   }
   
   public GumTreeOutput exec() throws IOException {
+    final String key = input.getSrcPath() + "-" + input.getDstPath();
+    log.debug("Start GumTree: " + key);
+
     final TreeContext srcTreeContext = getTreeContext(input.getSrcContents());
     final TreeContext dstTreeContext = getTreeContext(input.getDstContents());
 
@@ -34,7 +39,10 @@ public class GumTree {
         matcher.getMappings());
     final List<Action> actions = actionGenerator.generate();
 
-    return new GumTreeOutput(input, srcTreeContext, dstTreeContext, matcher.getMappings(), actions);
+    final GumTreeOutput output = new GumTreeOutput(input, srcTreeContext, dstTreeContext, matcher.getMappings(), actions);
+
+    log.debug("End GumTree: " + key);
+    return output;
   }
 
   private TreeContext getTreeContext(final String content) throws IOException {

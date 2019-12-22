@@ -11,12 +11,10 @@ public class CommitLog {
   private final Path fileName;
 
   public String getCommitId() {
-    return getCommit()
-        .getId()
-        .toString();
+    return commit.getName();
   }
 
   public String getCommitMessage() {
-    return getCommit().getFullMessage();
+    return commit.getFullMessage();
   }
 }

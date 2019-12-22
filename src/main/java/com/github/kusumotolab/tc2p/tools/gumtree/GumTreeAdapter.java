@@ -46,10 +46,10 @@ public class GumTreeAdapter {
       return "class XXX {}";
     }
 
-    final String javaDocRemovedContent = removeJavaDoc(content);
-    return filePath.endsWith(".java") ? javaDocRemovedContent
-        : filePath.endsWith(".mjava") ? "class XXX { " + javaDocRemovedContent + "}"
+    final String classContent = filePath.endsWith(".java") ? content
+        : filePath.endsWith(".mjava") ? "class XXX { " + content + "}"
             : "class XXX {}";
+    return removeJavaDoc(classContent);
   }
 
   private GumTreeInput createGumTreeInput(final Path srcPath, final Path dstPath,

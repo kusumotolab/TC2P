@@ -2,7 +2,6 @@ package com.github.kusumotolab.tc2p.core.entities;
 
 import java.lang.reflect.Field;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

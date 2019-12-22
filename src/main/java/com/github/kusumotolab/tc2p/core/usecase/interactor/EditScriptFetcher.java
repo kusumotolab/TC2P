@@ -1,0 +1,77 @@
+package com.github.kusumotolab.tc2p.core.usecase.interactor;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import com.github.kusumotolab.tc2p.core.entities.EditScript;
+import com.github.kusumotolab.tc2p.core.entities.TreeNode;
+import com.github.kusumotolab.tc2p.core.entities.TreeNodeRawObject;
+import com.github.kusumotolab.tc2p.core.usecase.interactor.EditScriptFetcher.Input;
+import com.github.kusumotolab.tc2p.tools.db.Query;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteCondition;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteCondition.RelationalOperator;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import lombok.Data;
+
+public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
+
+  @Override
+  public List<EditScript> execute(final Input input) {
+    final SQLite sqLite = new SQLite();
+    final Map<String, TreeNodeRawObject> treeNodeRawMap = createTreeNodeMap(input, sqLite);
+    final Query<EditScript> query = createQuery(input);
+    final List<EditScript> editScripts = sqLite.fetch(query).toList().blockingGet();
+
+    for (final EditScript editScript : editScripts) {
+      final String baseKey = createBaseKey(editScript);
+      final Map<Integer, TreeNode> treeNodeMap = Maps.newHashMap();
+      final List<TreeNode> treeNodes = Lists.newArrayList();
+      for (final int treeNodeId : editScript.getTreeNodeIds()) {
+        final TreeNodeRawObject rawObject = treeNodeRawMap.get(baseKey + treeNodeId);
+        final TreeNode treeNode = rawObject.asTreeNode(treeNodeMap::get);
+        treeNodeMap.put(treeNodeId, treeNode);
+        treeNodes.add(treeNode);
+      }
+      editScript.setTreeNodes(treeNodes);
+    }
+    return editScripts;
+  }
+
+  private Map<String, TreeNodeRawObject> createTreeNodeMap(final Input input, final SQLite sqLite) {
+    return new TreeNodeFetcher(sqLite)
+        .execute(new TreeNodeFetcher.Input(input.getProjectName()))
+        .stream()
+        .collect(Collectors.toMap(this::createKey, e -> e));
+  }
+
+  private String createKey(final TreeNodeRawObject object) {
+    return object.getProjectName()
+        + object.getSrcCommitId()
+        + object.getDstCommitId()
+        + object.getId();
+  }
+
+  private String createBaseKey(final EditScript editScript) {
+    return editScript.getProjectName()
+        + editScript.getSrcCommitID()
+        + editScript.getDstCommitID();
+  }
+
+  private Query<EditScript> createQuery(final Input input) {
+    final SQLiteCondition condition = new SQLiteCondition("project_name",
+        RelationalOperator.EQUAL, input.getProjectName());
+    return SQLiteQuery.select(EditScript.class)
+        .from(EditScript.class)
+        .where(condition)
+        .build();
+  }
+
+  @Data
+  public static class Input {
+
+    private final String projectName;
+  }
+}

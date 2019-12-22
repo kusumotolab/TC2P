@@ -2,9 +2,9 @@ package com.github.kusumotolab.tc2p.core.presenter;
 
 import com.github.kusumotolab.tc2p.core.view.ConsoleView;
 
-public class MiningPresenter extends IMiningPresenter<ConsoleView> {
+public class MiningRepositoryPresenter extends IMiningRepositoryPresenter<ConsoleView> {
 
-  public MiningPresenter(final ConsoleView view) {
+  public MiningRepositoryPresenter(final ConsoleView view) {
     super(view);
   }
 

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class TreeNodeRawObject extends SQLiteObject {
 
   @Getter
-  @SQLiteColumn(type = Types.CHAR, name = "project_name", primaryKey = true)
+  @SQLiteColumn(type = Types.CHAR, name = "project_name", primaryKey = true, indexIds = {"project_index"})
   private String projectName;
 
   @Getter

@@ -29,6 +29,7 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
         .andThen(sqLite.createTable(TreeNodeRawObject.class))
         .andThen(sqLite.createTable(EditScript.class))
         .andThen(inputObservable)
+        .filter(input -> !input.getGumTreeOutput().getActions().isEmpty())
         .map(this::createEditScript)
         .flatMapCompletable(editScript -> {
           final Observable<TreeNodeRawObject> treeNodes = Observable
