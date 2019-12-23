@@ -24,8 +24,16 @@ public class TreeNodeRawObject extends SQLiteObject {
   private String srcCommitId;
 
   @Getter
+  @SQLiteColumn(type = Types.CHAR, name = "src_file_path", primaryKey = true)
+  private String srcFilePath;
+
+  @Getter
   @SQLiteColumn(type = Types.CHAR, name = "dst_commit_id", primaryKey = true)
   private String dstCommitId;
+
+  @Getter
+  @SQLiteColumn(type = Types.CHAR, name = "dst_file_path", primaryKey = true)
+  private String dstFilePath;
 
   @Getter
   @SQLiteColumn(type = Types.INTEGER, primaryKey = true)
@@ -54,11 +62,8 @@ public class TreeNodeRawObject extends SQLiteObject {
   @SQLiteColumn(type = Types.CHAR)
   private String type;
 
-  public TreeNodeRawObject(final String projectName, final String srcCommitId,
-      final String dstCommitId, final int id,
-      final int pos, final TreeNode parentNode,
-      final List<ActionEnum> actions, final String value, final String newValue,
-      final String type) {
+  public TreeNodeRawObject(final String projectName, final String srcCommitId, final String dstCommitId, final int id, final int pos,
+      final TreeNode parentNode, final List<ActionEnum> actions, final String value, final String newValue, final String type) {
     this.projectName = projectName;
     this.srcCommitId = srcCommitId;
     this.dstCommitId = dstCommitId;
@@ -73,8 +78,7 @@ public class TreeNodeRawObject extends SQLiteObject {
 
   public TreeNode asTreeNode(final Function<Integer, TreeNode> resolver) {
     if (pos == -1) {
-      return TreeNode.createRoot(projectName, srcCommitId, dstCommitId, id, actions, value,
-          newValue, type);
+      return TreeNode.createRoot(projectName, srcCommitId, srcFilePath, dstCommitId, dstFilePath, id, actions, value, newValue, type);
     }
     final TreeNode parentNode = resolver.apply(parentNodeId);
     return parentNode.addChild(id, pos, actions, value, newValue, type);

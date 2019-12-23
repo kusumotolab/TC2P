@@ -64,9 +64,10 @@ public class TreeNodeAdaptor implements Interactor<Input, Optional<TreeNode>> {
       final Map<ITree, TreeNode> treeNodeMap) {
     final ITree srcRoot = input.srcTreeContext.getRoot();
     final int id = srcRoot.getId();
-    final TreeNode root = TreeNode.createRoot(input.projectName, input.srcCommitId,
-        input.dstCommitId, id, actionStore.getActions(srcRoot, true), srcRoot.getLabel(), null,
-        ITreeUtil.getNodeType(srcRoot, input.srcTreeContext));
+    final TreeNode root = TreeNode
+        .createRoot(input.projectName, input.srcCommitId, input.srcFilePath, input.dstCommitId, input.dstFilePath, id,
+            actionStore.getActions(srcRoot, true), srcRoot.getLabel(), null,
+            ITreeUtil.getNodeType(srcRoot, input.srcTreeContext));
     treeNodeMap.put(srcRoot, root);
     return root;
   }
@@ -150,7 +151,9 @@ public class TreeNodeAdaptor implements Interactor<Input, Optional<TreeNode>> {
 
     private final String projectName;
     private final String srcCommitId;
+    private final String srcFilePath;
     private final String dstCommitId;
+    private final String dstFilePath;
     private final MappingStore mappingStore;
     private final TreeContext srcTreeContext;
     private final TreeContext dstTreeContext;

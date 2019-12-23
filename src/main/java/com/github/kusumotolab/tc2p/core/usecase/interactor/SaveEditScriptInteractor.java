@@ -77,11 +77,15 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
     final CommitLogPair commitLogPair = input.getCommitLogPair();
     final CommitLog srcCommitLog = commitLogPair.getSrcCommitLog();
     final CommitLog dstCommitLog = commitLogPair.getDstCommitLog();
+
+    final String srcPath = srcCommitLog.getFileName().toString();
+    final String dstPath = dstCommitLog.getFileName().toString();
+
     final GumTreeOutput gumTreeOutput = input.getGumTreeOutput();
     final List<Action> actions = gumTreeOutput.getActions();
 
     final TreeNodeAdaptor.Input adapterInput = new TreeNodeAdaptor.Input(input.getProjectName(),
-        srcCommitLog.getCommitId(), dstCommitLog.getCommitId(), gumTreeOutput.getMappingStore(),
+        srcCommitLog.getCommitId(), srcPath, dstCommitLog.getCommitId(), dstPath, gumTreeOutput.getMappingStore(),
         gumTreeOutput.getSrcTreeContext(), gumTreeOutput.getDstTreeContext(), actions);
     return new TreeNodeAdaptor().execute(adapterInput);
   }

@@ -8,36 +8,29 @@ import lombok.Getter;
 
 public class TreeNode {
 
-  @Getter
-  private String projectName;
-  @Getter
-  private String srcCommitId;
-  @Getter
-  private String dstCommitId;
-  @Getter
-  private int id;
-  @Getter
-  private final int pos;
-  @Getter
-  private TreeNode parentNode;
-  @Getter
-  private final List<ActionEnum> actions;
-  @Getter
-  private final String value;
-  @Getter
-  private final String newValue;
-  @Getter
-  private final String type;
-  @Getter
-  private final List<TreeNode> children = Lists.newArrayList();
+  @Getter private final String projectName;
+  @Getter private final String srcCommitId;
+  @Getter private final String srcFilePath;
+  @Getter private final String dstCommitId;
+  @Getter private final String dstFilePath;
+  @Getter private int id;
+  @Getter private final int pos;
+  @Getter private TreeNode parentNode;
+  @Getter private final List<ActionEnum> actions;
+  @Getter private final String value;
+  @Getter private final String newValue;
+  @Getter private final String type;
+  @Getter private final List<TreeNode> children = Lists.newArrayList();
   private Boolean cache_hasAction;
 
-  public TreeNode(final String projectName, final String srcCommitId, final String dstCommitId,
-      final int id, final int pos, final TreeNode parentNode, final List<ActionEnum> actions,
-      final String value, final String newValue, final String type) {
+  private TreeNode(final String projectName, final String srcCommitId, final String srcFilePath, final String dstCommitId,
+      final String dstFilePath, final int id, final int pos,
+      final TreeNode parentNode, final List<ActionEnum> actions, final String value, final String newValue, final String type) {
     this.projectName = projectName;
     this.srcCommitId = srcCommitId;
+    this.srcFilePath = srcFilePath;
     this.dstCommitId = dstCommitId;
+    this.dstFilePath = dstFilePath;
     this.id = id;
     this.pos = pos;
     this.parentNode = parentNode;
@@ -47,17 +40,17 @@ public class TreeNode {
     this.type = type;
   }
 
-  public static TreeNode createRoot(final String projectName, final String srcCommitId,
-      final String dstCommitId, final int id, final List<ActionEnum> actions, final String value,
-      final String newValue, final String type) {
-    return new TreeNode(projectName, srcCommitId, dstCommitId, id, -1, null, actions, value,
+  public static TreeNode createRoot(final String projectName, final String srcCommitId, final String srcFilePath, final String dstCommitId,
+      final String dstFilePath, final int id, final List<ActionEnum> actions, final String value, final String newValue,
+      final String type) {
+    return new TreeNode(projectName, srcCommitId, srcFilePath, dstCommitId, dstFilePath, id, -1, null, actions, value,
         newValue, type);
   }
 
   public TreeNode addChild(final int id, final int pos, final List<ActionEnum> actions,
       final String value, final String newValue, final String type) {
-    final TreeNode treeNode = new TreeNode(projectName, srcCommitId, dstCommitId, id, pos, this,
-        actions, value, newValue, type);
+    final TreeNode treeNode = new TreeNode(projectName, srcCommitId, srcFilePath, dstCommitId, dstFilePath, id, pos, this, actions, value,
+        newValue, type);
     children.add(treeNode);
     children.sort(Comparator.comparingInt(e -> e.pos));
     return treeNode;
