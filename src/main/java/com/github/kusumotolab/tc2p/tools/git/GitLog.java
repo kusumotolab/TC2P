@@ -16,7 +16,7 @@ public class GitLog extends GitCommand<String, Observable<RevCommit>> {
   @Override
   public Observable<RevCommit> execute(final String id) {
     return Observable.create(emitter -> {
-      final Iterable<RevCommit> call = Try.force(() -> new Git(repository).log().add(ObjectId.fromString(id)).call());
+      final Iterable<RevCommit> call = Try.force(() -> new Git(repository).log().call());
       call.forEach(emitter::onNext);
       emitter.onComplete();
     });

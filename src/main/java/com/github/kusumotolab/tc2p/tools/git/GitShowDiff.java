@@ -25,9 +25,9 @@ public class GitShowDiff extends GitCommand<CommitPair, Observable<FileRevision>
 
       try (ObjectReader reader = repository.newObjectReader()) {
         final CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-        oldTreeIter.reset(reader, srcCommit.getId());
+        oldTreeIter.reset(reader, srcCommit.getTree().getId());
         CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-        newTreeIter.reset(reader, dstCommit.getId());
+        newTreeIter.reset(reader, dstCommit.getTree().getId());
 
         try (Git git = new Git(repository)) {
           git.diff()
