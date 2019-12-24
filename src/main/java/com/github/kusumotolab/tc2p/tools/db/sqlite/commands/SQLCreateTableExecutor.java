@@ -14,6 +14,7 @@ import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.reactivex.Completable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -28,7 +29,7 @@ public class SQLCreateTableExecutor extends SQLCommandExecutor {
       createTable(modelClass);
       createIndexes(modelClass);
       emitter.onComplete();
-    });
+    }).subscribeOn(Schedulers.single());
   }
 
   private <Model extends SQLiteObject> void createTable(final Class<Model> modelClass)
@@ -37,7 +38,7 @@ public class SQLCreateTableExecutor extends SQLCommandExecutor {
     final List<String> primaryKeys = columns.stream()
         .filter(column -> column.getValue()
             .primaryKey())
-        .map(e -> e.getName())
+        .map(Column::getName)
         .collect(Collectors.toList());
 
     final List<String> columnNames = columns

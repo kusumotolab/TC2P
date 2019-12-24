@@ -15,20 +15,26 @@ import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeInput;
 import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeOutput;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class SaveEditScriptInteractor implements Interactor<Observable<Input>, Completable> {
 
+  private final SQLite sqLite;
+
+  public SaveEditScriptInteractor() {
+    this.sqLite = new SQLite();
+    sqLite.connect()
+        .andThen(sqLite.createTable(TreeNodeRawObject.class))
+        .andThen(sqLite.createTable(EditScript.class)).blockingAwait();
+
+  }
+
   @Override
   public Completable execute(final Observable<Input> inputObservable) {
-    final SQLite sqLite = new SQLite();
-
-    return sqLite.connect()
-        .andThen(sqLite.createTable(TreeNodeRawObject.class))
-        .andThen(sqLite.createTable(EditScript.class))
-        .andThen(inputObservable)
+    return inputObservable
         .filter(input -> !input.getGumTreeOutput().getActions().isEmpty())
         .map(this::createEditScript)
         .flatMapCompletable(editScript -> {
