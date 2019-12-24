@@ -2,7 +2,6 @@ package com.github.kusumotolab.tc2p.tools.gumtree;
 
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -10,9 +9,10 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jgit.revwalk.RevCommit;
-import com.github.kusumotolab.tc2p.core.entities.CommitLogPair;
-import com.github.kusumotolab.tc2p.tools.git.CommitLog;
+import com.github.kusumotolab.tc2p.core.entities.CommitPair;
+import com.github.kusumotolab.tc2p.core.entities.FileRevision.FileRef;
 import com.github.kusumotolab.tc2p.tools.git.GitClient;
+import io.reactivex.Observable;
 
 public class GumTreeAdapter {
 
@@ -22,45 +22,44 @@ public class GumTreeAdapter {
     this.repositoryPath = repositoryPath;
   }
 
-  public Optional<GumTreeInput> convert(final CommitLogPair commitLogPair) {
+  public Observable<GumTreeInput> convert(final CommitPair commitLogPair) {
     return GitClient.create(repositoryPath)
-        .map(gitClient -> {
-          final CommitLog srcCommitLog = commitLogPair.getSrcCommitLog();
-          final CommitLog dstCommitLog = commitLogPair.getDstCommitLog();
+        .map(gitClient -> gitClient.show(commitLogPair)
+            .map(fileRevision -> {
+              final FileRef srcFileRef = fileRevision.getSrc();
+              final FileRef dstFileRef = fileRevision.getDst();
 
-          final String srcContents = getContents(srcCommitLog, gitClient);
-          final String dstContents = getContents(dstCommitLog, gitClient);
-
-          return createGumTreeInput(srcCommitLog.getFileName(), dstCommitLog.getFileName(),
-              srcContents, dstContents);
-        });
+              return createGumTreeInput(srcFileRef.getName(), dstFileRef.getName(),
+                  getContents(srcFileRef, gitClient), getContents(dstFileRef, gitClient));
+            })
+        )
+        .orElse(Observable.empty());
   }
 
-  private String getContents(final CommitLog commitLog, final GitClient gitClient) {
-    final RevCommit commit = commitLog.getCommit();
-    final String filePath = commitLog.getFileName()
-        .toString();
+  private String getContents(final FileRef fileRef, final GitClient gitClient) {
+    final RevCommit commit = fileRef.getCommit();
+    final String fileName = fileRef.getName();
 
-    final String content = gitClient.catBlob(commit, filePath).blockingGet();
+    final String content = gitClient.catBlob(commit, fileName).blockingGet();
     if (content == null) {
       return "class XXX {}";
     }
 
-    final String classContent = filePath.endsWith(".java") ? content
-        : filePath.endsWith(".mjava") ? "class XXX { " + content + "}"
+    final String classContent = fileName.endsWith(".java") ? content
+        : fileName.endsWith(".mjava") ? "class XXX { " + content + "}"
             : "class XXX {}";
     return removeJavaDoc(classContent);
   }
 
-  private GumTreeInput createGumTreeInput(final Path srcPath, final Path dstPath,
+  private GumTreeInput createGumTreeInput(final String srcPath, final String dstPath,
       final String srcContents, final String dstContents) {
-    return new GumTreeInput(srcPath.toString(), dstPath.toString(), srcContents, dstContents);
+    return new GumTreeInput(srcPath, dstPath, srcContents, dstContents);
   }
 
   private String removeJavaDoc(final String methodText) {
     ASTParser parser = ASTParser.newParser(AST.JLS11);
     parser.setKind(ASTParser.K_COMPILATION_UNIT);
-    Map pOptions = JavaCore.getOptions();
+    final Map<String, String> pOptions = JavaCore.getOptions();
     pOptions.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_11);
     pOptions.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_11);
     pOptions.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_11);

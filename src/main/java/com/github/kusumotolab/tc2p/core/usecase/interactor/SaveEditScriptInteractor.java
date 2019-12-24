@@ -3,19 +3,18 @@ package com.github.kusumotolab.tc2p.core.usecase.interactor;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.eclipse.jgit.revwalk.RevCommit;
 import com.github.gumtreediff.actions.model.Action;
-import com.github.kusumotolab.tc2p.core.entities.CommitLogPair;
+import com.github.kusumotolab.tc2p.core.entities.CommitPair;
 import com.github.kusumotolab.tc2p.core.entities.EditScript;
 import com.github.kusumotolab.tc2p.core.entities.TreeNode;
 import com.github.kusumotolab.tc2p.core.entities.TreeNodeRawObject;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.SaveEditScriptInteractor.Input;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
-import com.github.kusumotolab.tc2p.tools.git.CommitLog;
 import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeInput;
 import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeOutput;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,22 +47,20 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
   }
 
   private EditScript createEditScript(final Input input) {
-    final CommitLogPair commitLogPair = input.getCommitLogPair();
-    final CommitLog srcCommitLog = commitLogPair.getSrcCommitLog();
-    final CommitLog dstCommitLog = commitLogPair.getDstCommitLog();
-
     final GumTreeOutput gumTreeOutput = input.getGumTreeOutput();
     final GumTreeInput gumTreeInput = gumTreeOutput.getInput();
 
     final EditScript editScript = new EditScript();
 
+    final RevCommit srcCommit = input.getCommitPair().getSrcCommit();
     editScript.setSrcName(gumTreeInput.getSrcPath());
-    editScript.setSrcCommitID(srcCommitLog.getCommitId());
-    editScript.setSrcCommitMessage(srcCommitLog.getCommitMessage());
+    editScript.setSrcCommitID(srcCommit.getName());
+    editScript.setSrcCommitMessage(srcCommit.getFullMessage());
 
+    final RevCommit dstCommit = input.getCommitPair().getDstCommit();
     editScript.setDstName(gumTreeInput.getDstPath());
-    editScript.setDstCommitID(dstCommitLog.getCommitId());
-    editScript.setDstCommitMessage(dstCommitLog.getCommitMessage());
+    editScript.setDstCommitID(dstCommit.getName());
+    editScript.setDstCommitMessage(dstCommit.getFullMessage());
 
     editScript.setProjectName(input.getProjectName());
 
@@ -80,19 +77,16 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
   }
 
   private Optional<TreeNode> createTreeNode(final Input input) {
-    final CommitLogPair commitLogPair = input.getCommitLogPair();
-    final CommitLog srcCommitLog = commitLogPair.getSrcCommitLog();
-    final CommitLog dstCommitLog = commitLogPair.getDstCommitLog();
-
-    final String srcPath = srcCommitLog.getFileName().toString();
-    final String dstPath = dstCommitLog.getFileName().toString();
+    final GumTreeInput gumTreeInput = input.getGumTreeOutput().getInput();
+    final String srcPath = gumTreeInput.getSrcPath();
+    final String dstPath = gumTreeInput.getDstPath();
 
     final GumTreeOutput gumTreeOutput = input.getGumTreeOutput();
     final List<Action> actions = gumTreeOutput.getActions();
 
     final TreeNodeAdaptor.Input adapterInput = new TreeNodeAdaptor.Input(input.getProjectName(),
-        srcCommitLog.getCommitId(), srcPath, dstCommitLog.getCommitId(), dstPath, gumTreeOutput.getMappingStore(),
-        gumTreeOutput.getSrcTreeContext(), gumTreeOutput.getDstTreeContext(), actions);
+        input.getCommitPair().getSrcCommit().getName(), srcPath, input.getCommitPair().getDstCommit().getName(), dstPath,
+        gumTreeOutput.getMappingStore(), gumTreeOutput.getSrcTreeContext(), gumTreeOutput.getDstTreeContext(), actions);
     return new TreeNodeAdaptor().execute(adapterInput);
   }
 
@@ -100,7 +94,7 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
   public static class Input {
 
     private final String projectName;
-    private final CommitLogPair commitLogPair;
+    private final CommitPair commitPair;
     private final GumTreeOutput gumTreeOutput;
   }
 
