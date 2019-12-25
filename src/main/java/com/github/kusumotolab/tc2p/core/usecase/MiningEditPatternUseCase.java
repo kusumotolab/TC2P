@@ -35,7 +35,7 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
     final List<EditScript> editScripts = new EditScriptFetcher().execute(editScriptFetcherInput);
     presenter.endFetchEditScript(editScripts);
 
-    editScripts.stream()
+    editScripts.parallelStream()
         .filter(e -> !e.getTreeNodeIds().isEmpty())
         .map(this::convertToNode)
         .forEach(trees::add);

@@ -25,18 +25,19 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
     final Query<EditScript> query = createQuery(input);
     final List<EditScript> editScripts = sqLite.fetch(query).toList().blockingGet();
 
-    for (final EditScript editScript : editScripts) {
-      final String baseKey = createBaseKey(editScript);
-      final Map<Integer, TreeNode> treeNodeMap = Maps.newHashMap();
-      final List<TreeNode> treeNodes = Lists.newArrayList();
-      for (final int treeNodeId : editScript.getTreeNodeIds()) {
-        final TreeNodeRawObject rawObject = treeNodeRawMap.get(baseKey + treeNodeId);
-        final TreeNode treeNode = rawObject.asTreeNode(treeNodeMap::get);
-        treeNodeMap.put(treeNodeId, treeNode);
-        treeNodes.add(treeNode);
-      }
-      editScript.setTreeNodes(treeNodes);
-    }
+    editScripts.parallelStream()
+        .forEach(editScript -> {
+          final String baseKey = createBaseKey(editScript);
+          final Map<Integer, TreeNode> treeNodeMap = Maps.newHashMap();
+          final List<TreeNode> treeNodes = Lists.newArrayList();
+          for (final int treeNodeId : editScript.getTreeNodeIds()) {
+            final TreeNodeRawObject rawObject = treeNodeRawMap.get(baseKey + treeNodeId);
+            final TreeNode treeNode = rawObject.asTreeNode(treeNodeMap::get);
+            treeNodeMap.put(treeNodeId, treeNode);
+            treeNodes.add(treeNode);
+          }
+          editScript.setTreeNodes(treeNodes);
+        });
     return editScripts;
   }
 
