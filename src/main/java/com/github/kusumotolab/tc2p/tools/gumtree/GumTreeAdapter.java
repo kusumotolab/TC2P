@@ -25,6 +25,7 @@ public class GumTreeAdapter {
   public Observable<GumTreeInput> convert(final CommitPair commitLogPair) {
     return GitClient.create(repositoryPath)
         .map(gitClient -> gitClient.show(commitLogPair)
+            .filter(fileRevision -> fileRevision.getSrc().getName().endsWith("java") && fileRevision.getDst().getName().endsWith("java"))
             .map(fileRevision -> {
               final FileRef srcFileRef = fileRevision.getSrc();
               final FileRef dstFileRef = fileRevision.getDst();
