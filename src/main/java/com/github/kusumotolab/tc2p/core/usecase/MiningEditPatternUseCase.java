@@ -30,6 +30,7 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
   public void execute(final Input input) {
     final Set<Node<ASTLabel>> trees = Sets.newHashSet();
 
+    presenter.startFetchEditScript();
     final EditScriptFetcher.Input editScriptFetcherInput = new EditScriptFetcher.Input(input.getProjectName());
     final List<EditScript> editScripts = new EditScriptFetcher().execute(editScriptFetcherInput);
     presenter.endFetchEditScript(editScripts);

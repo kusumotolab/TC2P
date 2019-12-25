@@ -23,6 +23,8 @@ public class SQLite implements DB<SQLiteObject> {
   private final String sqliteURL;
   private Connection connection;
 
+  final SQLInsertExecutor insertExecutor = new SQLInsertExecutor(this);
+
   public SQLite() {
     this(DEFAULT_SQLITE_PATH);
   }
@@ -88,7 +90,7 @@ public class SQLite implements DB<SQLiteObject> {
 
   public <Model extends SQLiteObject> Completable insert(final Observable<Model> observer,
       final int bufferSize) {
-    return new SQLInsertExecutor<Model>(this).execute(observer, bufferSize);
+    return insertExecutor.execute(observer, bufferSize);
   }
 
   @Override

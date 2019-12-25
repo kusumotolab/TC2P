@@ -16,6 +16,8 @@ public abstract class IMiningEditPatternPresenter<V extends View> extends Presen
     super(view);
   }
 
+  public abstract void startFetchEditScript();
+
   public abstract void endFetchEditScript(final List<EditScript> editScripts);
 
   public abstract void endConstructingTrees(final Set<Node<ASTLabel>> nodes);

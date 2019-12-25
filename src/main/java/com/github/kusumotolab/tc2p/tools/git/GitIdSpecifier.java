@@ -1,6 +1,5 @@
 package com.github.kusumotolab.tc2p.tools.git;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;

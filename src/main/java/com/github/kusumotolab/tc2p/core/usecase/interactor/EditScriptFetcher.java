@@ -50,14 +50,18 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
   private String createKey(final TreeNodeRawObject object) {
     return object.getProjectName()
         + object.getSrcCommitId()
+        + object.getSrcFilePath()
         + object.getDstCommitId()
+        + object.getDstFilePath()
         + object.getId();
   }
 
   private String createBaseKey(final EditScript editScript) {
     return editScript.getProjectName()
         + editScript.getSrcCommitID()
-        + editScript.getDstCommitID();
+        + editScript.getSrcName()
+        + editScript.getDstCommitID()
+        + editScript.getDstName();
   }
 
   private Query<EditScript> createQuery(final Input input) {

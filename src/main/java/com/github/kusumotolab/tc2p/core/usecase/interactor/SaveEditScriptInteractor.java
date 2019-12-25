@@ -11,10 +11,13 @@ import com.github.kusumotolab.tc2p.core.entities.TreeNode;
 import com.github.kusumotolab.tc2p.core.entities.TreeNodeRawObject;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.SaveEditScriptInteractor.Input;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeInput;
 import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeOutput;
+import com.google.common.collect.Lists;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Observer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,17 +36,26 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
 
   @Override
   public Completable execute(final Observable<Input> inputObservable) {
-    return inputObservable
+    final Observable<EditScript> es = inputObservable
         .filter(input -> !input.getGumTreeOutput().getActions().isEmpty())
         .map(this::createEditScript)
-        .flatMapCompletable(editScript -> {
-          final Observable<TreeNodeRawObject> treeNodes = Observable
-              .fromIterable(editScript.getTreeNodes())
-              .map(TreeNode::asRaw);
+        .share();
 
-          return sqLite.insert(treeNodes)
-              .andThen(sqLite.insert(Observable.just(editScript)));
-        }).andThen(sqLite.close());
+    final Observable<TreeNodeRawObject> treeNodeRawObjectObservable = es.flatMap(e -> Observable.fromIterable(e.getTreeNodes())).map(TreeNode::asRaw);
+
+    return Completable.merge(Lists.newArrayList(sqLite.insert(es), sqLite.insert(treeNodeRawObjectObservable)))
+        .andThen(sqLite.close());
+
+//    return inputObservable
+//        .filter(input -> !input.getGumTreeOutput().getActions().isEmpty())
+//        .map(this::createEditScript)
+//        .flatMapCompletable(editScript -> {
+//          final Observable<TreeNodeRawObject> treeNodes = Observable
+//              .fromIterable(editScript.getTreeNodes())
+//              .map(TreeNode::asRaw);
+//
+//          return sqLite.insert(Observable.merge(treeNodes, Observable.just(editScript)));
+//        }).andThen(sqLite.close());
   }
 
   private EditScript createEditScript(final Input input) {

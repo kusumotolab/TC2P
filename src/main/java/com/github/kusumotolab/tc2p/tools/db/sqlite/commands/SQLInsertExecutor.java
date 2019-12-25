@@ -11,19 +11,20 @@ import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SQLInsertExecutor<Model extends SQLiteObject> extends SQLCommandExecutor {
+public class SQLInsertExecutor extends SQLCommandExecutor {
 
   public SQLInsertExecutor(final SQLite sqLite) {
     super(sqLite);
   }
 
-  public Completable execute(final Observable<Model> observer, final int bufferSize) {
+  public <Model extends SQLiteObject> Completable execute(final Observable<Model> observer, final int bufferSize) {
     return Completable.fromObservable(observer.buffer(bufferSize)
             .doOnNext(list -> {
               if (list.isEmpty()) {
                 return;
               }
 
+              log.debug("Insert " + list.size() + " Objects.");
               final Connection connection = sqLite.getConnection();
               connection.setAutoCommit(false);
               final SQLiteObject sampleObject = list.get(0);
@@ -36,7 +37,6 @@ public class SQLInsertExecutor<Model extends SQLiteObject> extends SQLCommandExe
               }
               prepareStatement.executeBatch();
               connection.commit();
-              log.debug("Insert " + list.size() + " Objects.");
             })).subscribeOn(Schedulers.single());
   }
 }

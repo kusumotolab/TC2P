@@ -24,6 +24,11 @@ public class MiningEditPatternPresenter extends IMiningEditPatternPresenter<Cons
   }
 
   @Override
+  public void startFetchEditScript() {
+    view.print("Start Fetch");
+  }
+
+  @Override
   public void endFetchEditScript(final List<EditScript> editScripts) {
     view.print("Edit Scripts: " + editScripts.size());
   }
