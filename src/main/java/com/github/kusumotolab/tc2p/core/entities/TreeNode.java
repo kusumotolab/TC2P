@@ -57,8 +57,8 @@ public class TreeNode {
   }
 
   public TreeNodeRawObject asRaw() {
-    return new TreeNodeRawObject(projectName, srcCommitId, dstCommitId, id, pos, parentNode,
-        actions, value, newValue, type);
+    return new TreeNodeRawObject(projectName, srcCommitId, srcFilePath, dstCommitId, dstFilePath, id, pos, parentNode, actions, value,
+        newValue, type);
   }
 
   public List<TreeNode> getDescents() {

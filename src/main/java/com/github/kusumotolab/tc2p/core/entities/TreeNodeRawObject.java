@@ -62,11 +62,14 @@ public class TreeNodeRawObject extends SQLiteObject {
   @SQLiteColumn(type = Types.CHAR)
   private String type;
 
-  public TreeNodeRawObject(final String projectName, final String srcCommitId, final String dstCommitId, final int id, final int pos,
-      final TreeNode parentNode, final List<ActionEnum> actions, final String value, final String newValue, final String type) {
+  public TreeNodeRawObject(final String projectName, final String srcCommitId, final String srcFilePath, final String dstCommitId,
+      final String dstFilePath, final int id, final int pos, final TreeNode parentNode, final List<ActionEnum> actions, final String value,
+      final String newValue, final String type) {
     this.projectName = projectName;
     this.srcCommitId = srcCommitId;
+    this.srcFilePath = srcFilePath;
     this.dstCommitId = dstCommitId;
+    this.dstFilePath = dstFilePath;
     this.id = id;
     this.pos = pos;
     this.parentNodeId = parentNode != null ? parentNode.getId() : -1;
