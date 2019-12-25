@@ -16,6 +16,7 @@ import com.github.kusumotolab.tc2p.core.usecase.interactor.EditScriptFetcher;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.PatternFilter;
 import com.github.kusumotolab.tc2p.framework.View;
 import com.github.kusumotolab.tc2p.utils.ParallelFreqt;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -28,6 +29,7 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
 
   @Override
   public void execute(final Input input) {
+    final Stopwatch stopwatch = Stopwatch.createStarted();
     final Set<Node<ASTLabel>> trees = Sets.newHashSet();
 
     presenter.startFetchEditScript();
@@ -54,6 +56,8 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
     patternFilterResult.getValue().stream()
         .sorted(Comparator.comparingInt(e -> e.getRootNode().getDescents().size()))
         .forEach(presenter::pattern);
+
+    presenter.time("Total Time", stopwatch.elapsed());
   }
 
   private Node<ASTLabel> convertToNode(final EditScript editScript) {
