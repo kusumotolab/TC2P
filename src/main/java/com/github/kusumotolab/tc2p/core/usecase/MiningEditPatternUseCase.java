@@ -44,7 +44,7 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
     presenter.endConstructingTrees(trees);
 
     final double minimumSupport = calculateMinimumSupport(trees, input.getFrequency());
-    final ParallelFreqt<ASTLabel> freqt = new ParallelFreqt<>();
+    final ParallelFreqt freqt = new ParallelFreqt();
     final MeasuredResult<Set<TreePattern<ASTLabel>>> measuredResult = Measure.time(() -> freqt.mining(trees, minimumSupport));
     presenter.time("Freqt", measuredResult.getDuration());
 
