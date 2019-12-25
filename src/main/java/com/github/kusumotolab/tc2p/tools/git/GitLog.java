@@ -1,7 +1,6 @@
 package com.github.kusumotolab.tc2p.tools.git;
 
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import com.github.kusumotolab.tc2p.utils.Try;

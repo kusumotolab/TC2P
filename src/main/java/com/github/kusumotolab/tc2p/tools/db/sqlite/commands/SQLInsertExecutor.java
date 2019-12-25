@@ -6,7 +6,6 @@ import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 

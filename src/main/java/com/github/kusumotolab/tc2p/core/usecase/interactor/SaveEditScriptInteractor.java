@@ -11,13 +11,11 @@ import com.github.kusumotolab.tc2p.core.entities.TreeNode;
 import com.github.kusumotolab.tc2p.core.entities.TreeNodeRawObject;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.SaveEditScriptInteractor.Input;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
-import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeInput;
 import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeOutput;
 import com.google.common.collect.Lists;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 

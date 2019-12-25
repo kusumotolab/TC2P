@@ -1,15 +1,12 @@
 package com.github.kusumotolab.tc2p.core.usecase;
 
 import java.nio.file.Path;
-import java.time.Duration;
-import com.github.kusumotolab.sdl4j.util.Measure;
 import com.github.kusumotolab.tc2p.core.entities.CommitPair;
 import com.github.kusumotolab.tc2p.core.presenter.IMiningRepositoryPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.GumTreeExecutor;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.MiningRepositoryInteractor;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.SaveEditScriptInteractor;
 import com.github.kusumotolab.tc2p.framework.View;
-import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeOutput;
 import com.google.common.base.Stopwatch;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
