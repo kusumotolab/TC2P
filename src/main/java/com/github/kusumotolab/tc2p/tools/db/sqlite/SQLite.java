@@ -100,11 +100,11 @@ public class SQLite implements DB<SQLiteObject> {
 
   @Override
   public <Model extends SQLiteObject> Observable<Model> fetch(final Single<Query<Model>> single) {
-    return fetch(single, 10000);
+    return fetch(single, 1000000);
   }
 
   public <Model extends SQLiteObject> Observable<Model> fetch(final Query<Model> query) {
-    return fetch(query, 10000);
+    return fetch(query, 1000000);
   }
 
   public <Model extends SQLiteObject> Observable<Model> fetch(final Single<Query<Model>> single,

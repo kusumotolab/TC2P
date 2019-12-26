@@ -14,6 +14,8 @@ import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteCondition.RelationalOpe
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.Data;
 
 public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
@@ -23,10 +25,10 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
     final SQLite sqLite = new SQLite();
     final Map<String, TreeNodeRawObject> treeNodeRawMap = createTreeNodeMap(input, sqLite);
     final Query<EditScript> query = createQuery(input);
-    final List<EditScript> editScripts = sqLite.fetch(query).toList().blockingGet();
 
-    editScripts.parallelStream()
-        .forEach(editScript -> {
+    return sqLite.fetch(query)
+        .flatMap(e -> Observable.just(e).subscribeOn(Schedulers.computation()))
+        .map(editScript -> {
           final String baseKey = createBaseKey(editScript);
           final Map<Integer, TreeNode> treeNodeMap = Maps.newHashMap();
           final List<TreeNode> treeNodes = Lists.newArrayList();
@@ -37,13 +39,12 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
             treeNodes.add(treeNode);
           }
           editScript.setTreeNodes(treeNodes);
-        });
-    return editScripts;
+          return editScript;
+        }).toList().blockingGet();
   }
 
   private Map<String, TreeNodeRawObject> createTreeNodeMap(final Input input, final SQLite sqLite) {
-    return new TreeNodeFetcher(sqLite)
-        .execute(new TreeNodeFetcher.Input(input.getProjectName()))
+    return new TreeNodeFetcher(sqLite).execute(new TreeNodeFetcher.Input(input.getProjectName()))
         .stream()
         .collect(Collectors.toMap(this::createKey, e -> e));
   }
@@ -66,8 +67,7 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
   }
 
   private Query<EditScript> createQuery(final Input input) {
-    final SQLiteCondition condition = new SQLiteCondition("project_name",
-        RelationalOperator.EQUAL, input.getProjectName());
+    final SQLiteCondition condition = new SQLiteCondition("project_name", RelationalOperator.EQUAL, input.getProjectName());
     return SQLiteQuery.select(EditScript.class)
         .from(EditScript.class)
         .where(condition)
