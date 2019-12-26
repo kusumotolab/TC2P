@@ -22,6 +22,8 @@ public abstract class IMiningEditPatternPresenter<V extends View> extends Presen
 
   public abstract void endConstructingTrees(final Set<Node<ASTLabel>> nodes);
 
+  public abstract void endMiningPatterns(final Set<TreePattern<ASTLabel>> patterns);
+
   public abstract void time(final String name, final Duration duration);
 
   public abstract void pattern(final TreePattern<ASTLabel> pattern);

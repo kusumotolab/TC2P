@@ -37,7 +37,7 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
     final List<EditScript> editScripts = new EditScriptFetcher().execute(editScriptFetcherInput);
     presenter.endFetchEditScript(editScripts);
 
-    editScripts.parallelStream()
+    editScripts.stream()
         .filter(e -> !e.getTreeNodeIds().isEmpty())
         .map(this::convertToNode)
         .forEach(trees::add);
@@ -57,6 +57,7 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
         .sorted(Comparator.comparingInt(e -> e.getRootNode().getDescents().size()))
         .forEach(presenter::pattern);
 
+    presenter.endMiningPatterns(patternFilterResult.getValue());
     presenter.time("Total Time", stopwatch.elapsed());
   }
 

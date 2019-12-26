@@ -3,28 +3,9 @@ package com.github.kusumotolab.tc2p.tools.db.sqlite;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLiteCondition {
-
-  private final String left;
-  private final RelationalOperator relationalOperator;
-  private final String right;
+public abstract class SQLiteCondition {
 
   private final List<AdditionalCondition> additionalConditions = new ArrayList<>();
-
-  public SQLiteCondition() {
-    this("1", RelationalOperator.EQUAL, "1");
-  }
-
-  public SQLiteCondition(final Object left,
-      final RelationalOperator relationalOperator, final Object right) {
-    this.left = left.toString();
-    this.relationalOperator = relationalOperator;
-    if (right instanceof String) {
-      this.right = "\"" + right + "\"";
-    } else {
-      this.right = right.toString();
-    }
-  }
 
   public SQLiteCondition and(final SQLiteCondition condition) {
     additionalConditions.add(new AdditionalCondition(LogicalOperator.AND, condition));
@@ -36,12 +17,11 @@ public class SQLiteCondition {
     return this;
   }
 
+  public abstract String toConditionStatement();
+
   @Override
   public String toString() {
-    final StringBuilder builder = new StringBuilder();
-    builder.append(left)
-        .append(relationalOperator)
-        .append(right);
+    final StringBuilder builder = new StringBuilder().append(toConditionStatement());
 
     for (final AdditionalCondition additionalCondition : additionalConditions) {
       final SQLiteCondition condition = additionalCondition.getCondition();
@@ -75,25 +55,5 @@ public class SQLiteCondition {
 
   public enum LogicalOperator {
     AND, OR // TODO: NOT;
-  }
-
-  public enum RelationalOperator {
-    EQUAL("="),
-    NOT_EQUAL("<>"),
-    GREATER(">"),
-    GREATER_OR_EQUAL(">="),
-    LESS("<"),
-    LESS_OR_EQUAL("<=");
-
-    private final String text;
-
-    RelationalOperator(final String text) {
-      this.text = text;
-    }
-
-    @Override
-    public String toString() {
-      return this.text;
-    }
   }
 }

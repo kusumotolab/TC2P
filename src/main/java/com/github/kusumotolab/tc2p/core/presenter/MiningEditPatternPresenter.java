@@ -39,6 +39,11 @@ public class MiningEditPatternPresenter extends IMiningEditPatternPresenter<Cons
   }
 
   @Override
+  public void endMiningPatterns(final Set<TreePattern<ASTLabel>> patterns) {
+    view.print("The Results: " + patterns.size());
+  }
+
+  @Override
   public void time(final String name, final Duration duration) {
     view.print("The Time of " + name + ": " + duration.getSeconds() + "(s)");
   }

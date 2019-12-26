@@ -1,11 +1,10 @@
 package com.github.kusumotolab.tc2p.core.entities;
 
 import java.util.List;
-import java.util.function.Function;
-import com.github.kusumotolab.tc2p.utils.compare.IEquivalent;
-import com.google.common.collect.Lists;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+@EqualsAndHashCode(of = {"actions", "value", "newValue", "type"})
 public class ASTLabel {
 
   @Getter private final int id;
@@ -14,7 +13,6 @@ public class ASTLabel {
   @Getter private final String value;
   @Getter private final String newValue;
   @Getter private final String type;
-  @Getter private final Equivalent equivalent = new Equivalent();
 
   public ASTLabel(final TreeNode node) {
     this.id = node.getId();
@@ -24,30 +22,5 @@ public class ASTLabel {
     this.value = node.getValue();
     this.newValue = node.getNewValue();
     this.type = node.getType();
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    return equivalent.equal(this, ((ASTLabel) o));
-  }
-
-  @Override
-  public int hashCode() {
-    return equivalent.hashCode(this);
-  }
-
-  private static class Equivalent extends IEquivalent<ASTLabel> {
-
-    private final List<Function<ASTLabel, ?>> functions = Lists.newArrayList(
-        e -> e.actions,
-        e -> e.value,
-        e -> e.newValue,
-        e -> e.type
-    );
-
-    @Override
-    public List<Function<ASTLabel, ?>> getFunctions() {
-      return functions;
-    }
   }
 }

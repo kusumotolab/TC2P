@@ -6,7 +6,9 @@ import com.github.kusumotolab.tc2p.tools.db.Query;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import io.reactivex.Observable;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class SQLSelectExecutor<Model extends SQLiteObject> extends SQLCommandExecutor {
 
   public SQLSelectExecutor(final SQLite sqLite) {
@@ -19,7 +21,7 @@ public class SQLSelectExecutor<Model extends SQLiteObject> extends SQLCommandExe
           .createStatement();
       statement.setFetchSize(fetchSize);
       final String command = query.toCommand();
-
+      log.debug(command);
       final ResultSet resultSet = statement.executeQuery(command);
       while (resultSet.next()) {
         final Model object = query.resolve(resultSet);

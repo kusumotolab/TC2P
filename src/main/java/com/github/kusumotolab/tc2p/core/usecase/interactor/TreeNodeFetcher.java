@@ -6,8 +6,10 @@ import com.github.kusumotolab.tc2p.core.usecase.interactor.TreeNodeFetcher.Input
 import com.github.kusumotolab.tc2p.tools.db.Query;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteCondition;
-import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteCondition.RelationalOperator;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteLikeCondition;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition.RelationalOperator;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -27,8 +29,8 @@ public class TreeNodeFetcher implements Interactor<Input, List<TreeNodeRawObject
   }
 
   private Query<TreeNodeRawObject> createQuery(final Input input) {
-    final SQLiteCondition condition = new SQLiteCondition("project_name",
-        RelationalOperator.EQUAL, input.getProjectName());
+    final SQLiteCondition condition = new SQLiteRelationalCondition("project_name", RelationalOperator.EQUAL, input.getProjectName())
+        .and(new SQLiteLikeCondition("src_file_path", "src/main/java/%"));
 
     return SQLiteQuery.select(TreeNodeRawObject.class)
         .from(TreeNodeRawObject.class)
