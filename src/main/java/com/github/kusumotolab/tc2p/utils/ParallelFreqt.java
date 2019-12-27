@@ -154,10 +154,8 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     });
   }
 
-  private Set<TreePattern<ASTLabel>> extractFkPlus1(final Set<TreePattern<ASTLabel>> fk,
-      final Multimap<List<ASTLabel>, ASTLabel> cache,
-      final int borderline,
-      final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
+  private Set<TreePattern<ASTLabel>> extractFkPlus1(final Set<TreePattern<ASTLabel>> fk, final Multimap<List<ASTLabel>, ASTLabel> cache,
+      final int borderline, final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
     final List<Future<Set<Node<ASTLabel>>>> futures = Lists.newArrayList();
 
     for (final TreePattern<ASTLabel> treePattern : fk) {
