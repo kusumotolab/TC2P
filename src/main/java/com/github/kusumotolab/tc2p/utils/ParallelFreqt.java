@@ -27,8 +27,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
       .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
   @Override
-  public Set<TreePattern<ASTLabel>> mining(final Set<Node<ASTLabel>> trees,
-      final double minimumSupport) {
+  public Set<TreePattern<ASTLabel>> mining(final Set<Node<ASTLabel>> trees, final double minimumSupport) {
     log.debug("Start mining");
     final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache = HashMultimap.create();
     final Set<TreePattern<ASTLabel>> results = Sets.newHashSet();
@@ -37,9 +36,11 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
 
     final Set<TreePattern<ASTLabel>> f1 = extractF1(trees, borderline, countPatternCache);
     results.addAll(f1);
+    removeUnnecessaryRootTrees(trees, f1, minimumSupport);
     log.debug("Finish mining f1 (" + f1.size() + ")");
 
     final Set<TreePattern<ASTLabel>> f2 = extractF2(f1, borderline, countPatternCache);
+    f1.clear();
     removeUnnecessaryPatterns(results, f2);
     results.addAll(f2);
     removeUnnecessaryCache(1, countPatternCache);
@@ -53,6 +54,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     while (!fk.isEmpty()) {
       final Set<TreePattern<ASTLabel>> fkPlus1 = extractFkPlus1(fk, rightMostCacheMap, borderline,
           countPatternCache);
+      fk.clear();
       removeUnnecessaryPatterns(results, fkPlus1);
       results.addAll(fkPlus1);
       removeUnnecessaryCache(k, countPatternCache);
@@ -74,8 +76,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     return (int) (((double) sum) * minimumSupport);
   }
 
-  private Set<TreePattern<ASTLabel>> extractF1(final Set<Node<ASTLabel>> trees,
-      final int borderline,
+  private Set<TreePattern<ASTLabel>> extractF1(final Set<Node<ASTLabel>> trees, final int borderline,
       final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
     final Map<ASTLabel, Integer> map = trees.parallelStream()
         .map(Node::getDescents)
@@ -96,6 +97,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
           final boolean flag = count >= borderline;
           if (!flag) {
             synchronized (countPatternCache) {
+
               final Label<ASTLabel> label = new Label<>(0, e.getKey());
               countPatternCache.removeAll(Lists.newArrayList(label));
             }
@@ -242,8 +244,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
         .allMatch(descent -> descent.getLabel().getActions().isEmpty());
   }
 
-  private int countPattern(final Node<ASTLabel> subtree,
-      final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
+  private int countPattern(final Node<ASTLabel> subtree, final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
     final List<Label<ASTLabel>> subtreeLabels = Lists.newArrayList(subtree.getLabels());
     subtreeLabels.remove(subtreeLabels.size() - 1);
     return countPatternCache.get(subtreeLabels).stream()
@@ -260,8 +261,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
         .reduce(0, Integer::sum);
   }
 
-  private void removeUnnecessaryCache(final int removeSize,
-      final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
+  private void removeUnnecessaryCache(final int removeSize, final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
     final List<List<Label<ASTLabel>>> removedKeys = countPatternCache.keys()
         .parallelStream()
         .filter(labels -> labels.size() == removeSize)
@@ -269,8 +269,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     removedKeys.forEach(countPatternCache::removeAll);
   }
 
-  private void removeUnnecessaryPatterns(final Set<TreePattern<ASTLabel>> patterns,
-      final Set<TreePattern<ASTLabel>> fk) {
+  private void removeUnnecessaryPatterns(final Set<TreePattern<ASTLabel>> patterns, final Set<TreePattern<ASTLabel>> fk) {
     final Set<TreePattern<ASTLabel>> removedPattern = Sets.newConcurrentHashSet();
 
     fk.parallelStream()
@@ -286,5 +285,19 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
           }
         });
     patterns.removeAll(removedPattern);
+  }
+
+  private void removeUnnecessaryRootTrees(final Set<Node<ASTLabel>> roots, final Set<TreePattern<ASTLabel>> f1, final double borderline) {
+    final Set<Node<ASTLabel>> removedSet = roots.parallelStream()
+        .filter(root -> {
+          for (final TreePattern<ASTLabel> pattern : f1) {
+            final int countPatterns = root.countPatterns(pattern.getRootNode());
+            if (countPatterns >= borderline) {
+              return true;
+            }
+          }
+          return false;
+        }).collect(Collectors.toSet());
+    roots.removeAll(removedSet);
   }
 }

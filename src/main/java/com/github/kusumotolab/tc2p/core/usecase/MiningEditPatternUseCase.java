@@ -42,6 +42,7 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
         .map(this::convertToNode)
         .forEach(trees::add);
     presenter.endConstructingTrees(trees);
+    editScripts.clear();
 
     final double minimumSupport = calculateMinimumSupport(trees, input.getFrequency());
     final ParallelFreqt freqt = new ParallelFreqt();
