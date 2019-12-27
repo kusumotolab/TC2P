@@ -29,8 +29,7 @@ public class TreeNodeFetcher implements Interactor<Input, List<TreeNodeRawObject
   }
 
   private Query<TreeNodeRawObject> createQuery(final Input input) {
-    final SQLiteCondition condition = new SQLiteRelationalCondition("project_name", RelationalOperator.EQUAL, input.getProjectName())
-        .and(new SQLiteLikeCondition("src_file_path", "src/main/java/%"));
+    final SQLiteCondition condition = new SQLiteRelationalCondition("project_name", RelationalOperator.EQUAL, input.getProjectName());
 
     return SQLiteQuery.select(TreeNodeRawObject.class)
         .from(TreeNodeRawObject.class)

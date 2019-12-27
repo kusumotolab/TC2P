@@ -69,8 +69,7 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
   }
 
   private Query<EditScript> createQuery(final Input input) {
-    final SQLiteCondition condition = new SQLiteRelationalCondition("project_name", RelationalOperator.EQUAL, input.getProjectName())
-        .and(new SQLiteLikeCondition("src_name", "src/main/java/%"));
+    final SQLiteCondition condition = new SQLiteRelationalCondition("project_name", RelationalOperator.EQUAL, input.getProjectName());
     return SQLiteQuery.select(EditScript.class)
         .from(EditScript.class)
         .where(condition)
