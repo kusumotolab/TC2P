@@ -244,7 +244,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
 
   private int countPattern(final Node<ASTLabel> subtree,
       final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
-    final List<Label<ASTLabel>> subtreeLabels = subtree.getLabels();
+    final List<Label<ASTLabel>> subtreeLabels = Lists.newArrayList(subtree.getLabels());
     subtreeLabels.remove(subtreeLabels.size() - 1);
     return countPatternCache.get(subtreeLabels).stream()
         .map(node -> {
