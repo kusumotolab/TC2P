@@ -14,7 +14,6 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.TreePattern;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
-import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -24,8 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ParallelFreqt extends Freqt<ASTLabel> {
 
-  private ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime()
-      .availableProcessors());
+  private ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
   @Override
   public Set<TreePattern<ASTLabel>> mining(final Set<Node<ASTLabel>> trees, final double minimumSupport) {
@@ -41,6 +39,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
 
     final Set<TreePattern<ASTLabel>> f2 = extractF2(f1, borderline, countPatternCache);
     results.addAll(f2);
+    removeUnnecessaryCache(1, countPatternCache);
     log.debug("Finish mining f2 (" + f2.size() + ")");
 
     final Multimap<List<ASTLabel>, ASTLabel> rightMostCacheMap = HashMultimap.create();
@@ -51,9 +50,10 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     while (!fk.isEmpty()) {
       final Set<TreePattern<ASTLabel>> fkPlus1 = extractFkPlus1(fk, rightMostCacheMap, borderline, countPatternCache);
       results.addAll(fkPlus1);
+      removeUnnecessaryCache(k, countPatternCache);
       fk = fkPlus1;
       k += 1;
-      log.debug("Finish mining f" + k + "(" + fk.size() + ")");
+      log.debug("Finish mining f" + k + " (" + fk.size() + ")");
       updateRightMostCacheMap(fk, rightMostCacheMap);
     }
     log.debug("Finish mining");
@@ -129,8 +129,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
 
   private void updateRightMostCacheMap(final Set<TreePattern<ASTLabel>> fk,
       final Multimap<List<ASTLabel>, ASTLabel> rightMostCacheMap) {
-    fk.stream()
-        .forEach(pattern -> {
+    fk.forEach(pattern -> {
           final Node<ASTLabel> rootNode = pattern.getRootNode();
           final List<ASTLabel> rightMostBranch = rootNode.getRightMostBranch()
               .stream()
@@ -247,5 +246,13 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
           return countPatterns;
         })
         .reduce(0, Integer::sum);
+  }
+
+  private void removeUnnecessaryCache(final int removeSize, final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
+    final List<List<Label<ASTLabel>>> removedKeys = countPatternCache.keys()
+        .parallelStream()
+        .filter(labels -> labels.size() == removeSize)
+        .collect(Collectors.toList());
+    removedKeys.forEach(countPatternCache::removeAll);
   }
 }
