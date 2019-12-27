@@ -43,17 +43,6 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
 
     return Completable.merge(Lists.newArrayList(sqLite.insert(es), sqLite.insert(treeNodeRawObjectObservable)))
         .andThen(sqLite.close());
-
-//    return inputObservable
-//        .filter(input -> !input.getGumTreeOutput().getActions().isEmpty())
-//        .map(this::createEditScript)
-//        .flatMapCompletable(editScript -> {
-//          final Observable<TreeNodeRawObject> treeNodes = Observable
-//              .fromIterable(editScript.getTreeNodes())
-//              .map(TreeNode::asRaw);
-//
-//          return sqLite.insert(Observable.merge(treeNodes, Observable.just(editScript)));
-//        }).andThen(sqLite.close());
   }
 
   private EditScript createEditScript(final Input input) {
