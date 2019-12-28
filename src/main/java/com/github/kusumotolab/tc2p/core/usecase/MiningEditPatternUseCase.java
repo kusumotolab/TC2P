@@ -64,7 +64,8 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
 
   private Node<ASTLabel> convertToNode(final EditScript editScript) {
     final TreeNode compactedRootNode = compaction(editScript.getTreeNodes().get(0));
-    final Node<ASTLabel> rootNode = Node.createRootNode(new ASTLabel(compactedRootNode));
+    final String nodeId = extractIdFromTree(editScript);
+    final Node<ASTLabel> rootNode = Node.createRootNode(nodeId, new ASTLabel(compactedRootNode));
     final Map<Integer, Node<ASTLabel>> map = Maps.newHashMap();
     map.put(rootNode.getLabel().getId(), rootNode);
 
@@ -78,6 +79,22 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
       map.put(childNode.getLabel().getId(), childNode);
     }
     return rootNode;
+  }
+
+  private String extractIdFromTree(final EditScript editScript) {
+    return constructGitHubURLFromMJava(editScript);
+  }
+
+  private String constructGitHubURLFromMJava(final EditScript editScript) {
+    final String[] split = editScript.getProjectName().split("__");
+    final String userName = split[0];
+    final String repositoryName = split[1];
+    return "https://github.com/" + userName + "/" + repositoryName + "/commit/" + extractCommitIdFromFinerGitCommitMessage(
+        editScript.getDstCommitMessage());
+  }
+
+  private String extractCommitIdFromFinerGitCommitMessage(final String commitMessage) {
+    return commitMessage.substring(commitMessage.indexOf(':') + 1, commitMessage.indexOf('>'));
   }
 
   private TreeNode compaction(final TreeNode treeNode) {

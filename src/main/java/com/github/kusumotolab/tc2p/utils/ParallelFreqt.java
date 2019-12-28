@@ -1,6 +1,7 @@
 package com.github.kusumotolab.tc2p.utils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,7 +38,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
 
     final Set<TreePattern<ASTLabel>> f1 = extractF1(trees, borderline, countPatternCache);
     results.addAll(f1);
-    removeUnnecessaryRootTrees(trees, f1, minimumSupport);
+    removeUnnecessaryRootTrees(trees, f1);
     log.debug("Finish mining f1 (" + f1.size() + ")");
 
     final Set<TreePattern<ASTLabel>> f2 = extractF2(f1, borderline, countPatternCache);
@@ -78,6 +80,8 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
 
   private Set<TreePattern<ASTLabel>> extractF1(final Set<Node<ASTLabel>> trees, final int borderline,
       final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
+
+    final Multimap<ASTLabel, String> idMap = HashMultimap.create();
     final Map<ASTLabel, Integer> map = trees.parallelStream()
         .map(Node::getDescents)
         .flatMap(Collection::stream)
@@ -85,6 +89,9 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
           final Label<ASTLabel> label = new Label<>(0, node.getLabel());
           synchronized (countPatternCache) {
             countPatternCache.put(Lists.newArrayList(label), node);
+          }
+          synchronized (idMap) {
+            idMap.put(node.getLabel(), node.getTreeId());
           }
         })
         .map(Node::getLabel)
@@ -104,22 +111,27 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
           }
           return flag;
         })
-        .map(e -> new TreePattern<>(Node.createRootNode(e.getKey()), e.getValue()))
+        .map(e -> {
+          final ASTLabel label = e.getKey();
+          final Integer count = e.getValue();
+          final Set<String> ids = Sets.newHashSet(idMap.get(label));
+          return new TreePattern<>(Node.createRootNode("", label), ids, count);
+        })
         .collect(Collectors.toSet());
   }
 
-  private Set<TreePattern<ASTLabel>> extractF2(final Set<TreePattern<ASTLabel>> f1,
-      final int borderline,
+  private Set<TreePattern<ASTLabel>> extractF2(final Set<TreePattern<ASTLabel>> f1, final int borderline,
       final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
     final List<Future<Set<Node<ASTLabel>>>> futures = Lists.newArrayList();
 
     for (final TreePattern<ASTLabel> element1 : f1) {
-      final ASTLabel label1 = element1.getRootNode()
-          .getLabel();
+      final String treeId = element1.getRootNode().getTreeId();
+      final ASTLabel label = element1.getRootNode().getLabel();
+
       futures.add(threadPool.submit(() -> {
         final Set<Node<ASTLabel>> candidates = Sets.newHashSet();
         for (final TreePattern<ASTLabel> element2 : f1) {
-          final Node<ASTLabel> root = Node.createRootNode(label1);
+          final Node<ASTLabel> root = Node.createRootNode(treeId, label);
           root.createChildNode(element2.getRootNode()
               .getLabel());
           candidates.add(root);
@@ -136,8 +148,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     return filterOverBorderLineAndMap(borderline, candidates, countPatternCache);
   }
 
-  private void updateRightMostCacheMap(final Set<TreePattern<ASTLabel>> fk,
-      final Multimap<List<ASTLabel>, ASTLabel> rightMostCacheMap) {
+  private void updateRightMostCacheMap(final Set<TreePattern<ASTLabel>> fk, final Multimap<List<ASTLabel>, ASTLabel> rightMostCacheMap) {
     fk.forEach(pattern -> {
       final Node<ASTLabel> rootNode = pattern.getRootNode();
       final List<ASTLabel> rightMostBranch = rootNode.getRightMostBranch()
@@ -200,8 +211,8 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     final List<Future<TreePattern<ASTLabel>>> futures = candidates.stream()
         .filter(node -> !isUnnecessaryPattern(node))
         .map(candidate -> threadPool.submit(() -> {
-          final int count = countPattern(candidate, countPatternCache);
-          return new TreePattern<>(candidate, count);
+          final CountResult countResult = countPattern(candidate, countPatternCache);
+          return new TreePattern<>(candidate, countResult.getIds(), countResult.getCount());
         })).collect(Collectors.toList());
 
     return futures.stream()
@@ -241,7 +252,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
         .allMatch(descent -> descent.getLabel().getActions().isEmpty());
   }
 
-  private int countPattern(final Node<ASTLabel> subtree, final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
+  private CountResult countPattern(final Node<ASTLabel> subtree, final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
     final List<Label<ASTLabel>> subtreeLabels = Lists.newArrayList(subtree.getLabels());
     subtreeLabels.remove(subtreeLabels.size() - 1);
     return countPatternCache.get(subtreeLabels).stream()
@@ -253,9 +264,13 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
               countPatternCache.put(labels, node);
             }
           }
-          return Math.min(1, countPatterns);
+          return new CountResult(Math.min(1, countPatterns), Sets.newHashSet(node.getTreeId()));
         })
-        .reduce(0, Integer::sum);
+        .reduce((e1, e2) -> {
+          final Set<String> ids = Sets.newHashSet(e1.ids);
+          ids.addAll(e2.ids);
+          return new CountResult(e1.count + e2.count, ids);
+        }).orElse(new CountResult(0, Collections.emptySet()));
   }
 
   private void removeUnnecessaryCache(final int removeSize, final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
@@ -284,7 +299,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     patterns.removeAll(removedPattern);
   }
 
-  private void removeUnnecessaryRootTrees(final Set<Node<ASTLabel>> roots, final Set<TreePattern<ASTLabel>> f1, final double borderline) {
+  private void removeUnnecessaryRootTrees(final Set<Node<ASTLabel>> roots, final Set<TreePattern<ASTLabel>> f1) {
     final Set<Node<ASTLabel>> removedSet = roots.parallelStream()
         .filter(root -> {
           for (final TreePattern<ASTLabel> pattern : f1) {
@@ -296,5 +311,12 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
           return false;
         }).collect(Collectors.toSet());
     roots.removeAll(removedSet);
+  }
+
+  @Data
+  private static class CountResult {
+
+    private final int count;
+    private final Set<String> ids;
   }
 }
