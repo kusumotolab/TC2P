@@ -36,7 +36,7 @@ public class PatternFilter implements Interactor<Input, Set<TreePattern<ASTLabel
       final Node<ASTLabel> patternRootNode = pattern.getRootNode();
       final List<TreePattern<ASTLabel>> removeCandidatePatterns = removedPatterns.parallelStream()
           .filter(e -> !e.equals(pattern))
-          .filter(e -> e.countPatten() == pattern.countPatten())
+//          .filter(e -> e.countPatten() == pattern.countPatten())
           .filter(e -> patternRootNode.countPatterns(e.getRootNode()) > 0)
           .collect(Collectors.toList());
       removedPatterns.removeAll(removeCandidatePatterns);

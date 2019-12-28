@@ -195,8 +195,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     return filterOverBorderLineAndMap(borderline, candidates, countPatternCache);
   }
 
-  private Set<TreePattern<ASTLabel>> filterOverBorderLineAndMap(final int borderline,
-      final Set<Node<ASTLabel>> candidates,
+  private Set<TreePattern<ASTLabel>> filterOverBorderLineAndMap(final int borderline, final Set<Node<ASTLabel>> candidates,
       final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
     final List<Future<TreePattern<ASTLabel>>> futures = candidates.stream()
         .filter(node -> !isUnnecessaryPattern(node))
@@ -254,7 +253,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
               countPatternCache.put(labels, node);
             }
           }
-          return countPatterns;
+          return Math.min(1, countPatterns);
         })
         .reduce(0, Integer::sum);
   }
@@ -290,7 +289,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
         .filter(root -> {
           for (final TreePattern<ASTLabel> pattern : f1) {
             final int countPatterns = root.countPatterns(pattern.getRootNode());
-            if (countPatterns >= borderline) {
+            if (countPatterns >= 1) {
               return true;
             }
           }
