@@ -47,7 +47,7 @@ public class ParallelFreqtTest {
 
 
   private Node<ASTLabel> convertToNode(final TreeNode treeNode) {
-    final Node<ASTLabel> rootNode = Node.createRootNode(new ASTLabel(treeNode));
+    final Node<ASTLabel> rootNode = Node.createRootNode("TMP", new ASTLabel(treeNode));
     final Map<Integer, Node<ASTLabel>> map = Maps.newHashMap();
     map.put(rootNode.getLabel().getId(), rootNode);
 
