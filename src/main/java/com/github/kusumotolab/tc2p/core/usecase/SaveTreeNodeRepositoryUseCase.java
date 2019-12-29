@@ -1,20 +1,24 @@
 package com.github.kusumotolab.tc2p.core.usecase;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import com.github.kusumotolab.tc2p.core.entities.CommitPair;
 import com.github.kusumotolab.tc2p.core.presenter.IMiningRepositoryPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.GumTreeExecutor;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.MiningRepositoryInteractor;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.SaveEditScriptInteractor;
 import com.github.kusumotolab.tc2p.framework.View;
+import com.github.kusumotolab.tc2p.utils.Try;
 import com.google.common.base.Stopwatch;
+import com.google.common.io.Files;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SaveTreeNodeRepositoryUseCase<V extends View, P extends IMiningRepositoryPresenter<V>> extends
-    IMiningRepositoryUseCase<V, P> {
+public class SaveTreeNodeRepositoryUseCase<V extends View, P extends IMiningRepositoryPresenter<V>> extends IMiningRepositoryUseCase<V, P> {
+
+  private static final String DB_PATH = "./ignore/DB/";
 
   public SaveTreeNodeRepositoryUseCase(final P presenter) {
     super(presenter);
@@ -37,7 +41,10 @@ public class SaveTreeNodeRepositoryUseCase<V extends View, P extends IMiningRepo
 
     presenter.start();
     final Stopwatch stopwatch = Stopwatch.createStarted();
-    new SaveEditScriptInteractor().execute(inputObservable)
+    final String sqlitePath = DB_PATH + projectName + ".sqlite3";
+    //noinspection UnstableApiUsage
+    Try.lambda(() -> Files.createParentDirs(Paths.get(sqlitePath).toFile()));
+    new SaveEditScriptInteractor(sqlitePath).execute(inputObservable)
         .blockingAwait();
     presenter.end();
     presenter.time("Save Edit Script", stopwatch.elapsed());

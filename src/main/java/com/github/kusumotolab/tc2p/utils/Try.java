@@ -4,6 +4,21 @@ import java.util.Optional;
 
 public class Try {
 
+  public interface ThrowableLambda<E extends Exception> {
+    void apply() throws E;
+  }
+
+  public static <E extends Exception> void lambda(final ThrowableLambda<E> lambda) {
+    try {
+      lambda.apply();
+    } catch (final Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("failed force try");
+    }
+  }
+
+
+
   public interface ThrowableFunction<T, E extends Exception> {
     T apply() throws E;
   }

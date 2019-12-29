@@ -16,6 +16,7 @@ import com.github.kusumotolab.tc2p.tools.gumtree.GumTreeOutput;
 import com.google.common.collect.Lists;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,8 +25,8 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
 
   private final SQLite sqLite;
 
-  public SaveEditScriptInteractor() {
-    this.sqLite = new SQLite();
+  public SaveEditScriptInteractor(final String path) {
+    this.sqLite = new SQLite(path);
     sqLite.connect()
         .andThen(sqLite.createTable(TreeNodeRawObject.class))
         .andThen(sqLite.createTable(EditScript.class)).blockingAwait();
@@ -37,12 +38,14 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
     final Observable<EditScript> es = inputObservable
         .filter(input -> !input.getGumTreeOutput().getActions().isEmpty())
         .map(this::createEditScript)
+        .observeOn(Schedulers.single())
         .share();
 
-    final Observable<TreeNodeRawObject> treeNodeRawObjectObservable = es.flatMap(e -> Observable.fromIterable(e.getTreeNodes())).map(TreeNode::asRaw);
+    final Observable<TreeNodeRawObject> treeNodeRawObjectObservable = es.flatMap(e -> Observable.fromIterable(e.getTreeNodes())).map(TreeNode::asRaw)
+        .observeOn(Schedulers.single());
 
     return Completable.merge(Lists.newArrayList(sqLite.insert(es), sqLite.insert(treeNodeRawObjectObservable)))
-        .andThen(sqLite.close());
+        .andThen(sqLite.close()).subscribeOn(Schedulers.single());
   }
 
   private EditScript createEditScript(final Input input) {
