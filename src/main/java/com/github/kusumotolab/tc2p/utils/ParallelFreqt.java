@@ -84,7 +84,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     final Multimap<ASTLabel, String> idMap = HashMultimap.create();
     final Map<ASTLabel, Integer> map = trees.parallelStream()
         .map(Node::getDescents)
-        .flatMap(Collection::stream)
+        .flatMap(e -> e.stream().distinct())// TODO: 2019/12/29 各木のカウントの回数を高々1回にする
         .peek(node -> {
           final Label<ASTLabel> label = new Label<>(0, node.getLabel());
           synchronized (countPatternCache) {
