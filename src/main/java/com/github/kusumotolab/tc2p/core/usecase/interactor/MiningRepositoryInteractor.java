@@ -15,7 +15,7 @@ public class MiningRepositoryInteractor implements Interactor<Observable<Input>,
   public Observable<CommitPair> execute(final Observable<Input> observable) {
     return observable.flatMap(input -> {
       final Optional<GitClient> optionalGitClient = GitClient.create(input.getRepositoryPath());
-      if (optionalGitClient.isEmpty()) {
+      if (!optionalGitClient.isPresent()) {
         return Observable.empty();
       }
       final GitClient gitClient = optionalGitClient.get();
