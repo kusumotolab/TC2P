@@ -33,10 +33,12 @@ public class TreeNodeAdaptor implements Interactor<Input, Optional<TreeNode>> {
     final Map<ITree, TreeNode> treeNodeMap = Maps.newHashMap();
 
     unlinkIllegalMapping(input.mappingStore);
-    final TreeNode root = createRootNode(input, actionStore, treeNodeMap);
+    TreeNode root = createRootNode(input, actionStore, treeNodeMap);
     constructSrcTreeNode(input, actionStore, treeNodeMap);
     updateTreeNodeMapForMatchedNode(treeNodeMap, input);
     addDstTreeNode(input, treeNodeMap, actionStore);
+
+    root = root.compactAndGetNewRootNode();
     root.fixId();
 
     return Optional.of(root);
