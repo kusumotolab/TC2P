@@ -63,8 +63,8 @@ public class TreeNodeRawObject extends SQLiteObject {
   private String type;
 
   public TreeNodeRawObject(final String projectName, final String srcCommitId, final String srcFilePath, final String dstCommitId,
-      final String dstFilePath, final int id, final int pos, final TreeNode parentNode, final List<ActionEnum> actions, final String value,
-      final String newValue, final String type) {
+      final String dstFilePath, final int id,
+      final int pos,  final TreeNode parentNode, final List<ActionEnum> actions, final String value, final String newValue, final String type) {
     this.projectName = projectName;
     this.srcCommitId = srcCommitId;
     this.srcFilePath = srcFilePath;
@@ -80,10 +80,10 @@ public class TreeNodeRawObject extends SQLiteObject {
   }
 
   public TreeNode asTreeNode(final Function<Integer, TreeNode> resolver) {
-    if (pos == -1) {
+    final TreeNode parentNode = resolver.apply(parentNodeId);
+    if (pos == -1 || parentNode == null) {
       return TreeNode.createRoot(projectName, srcCommitId, srcFilePath, dstCommitId, dstFilePath, id, actions, value, newValue, type);
     }
-    final TreeNode parentNode = resolver.apply(parentNodeId);
     return parentNode.addChild(id, pos, actions, value, newValue, type);
   }
 

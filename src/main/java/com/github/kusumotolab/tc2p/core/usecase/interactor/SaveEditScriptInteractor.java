@@ -1,5 +1,7 @@
 package com.github.kusumotolab.tc2p.core.usecase.interactor;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,6 +65,10 @@ public class SaveEditScriptInteractor implements Interactor<Observable<Input>, C
     editScript.setDstName(gumTreeInput.getDstPath());
     editScript.setDstCommitID(dstCommit.getName());
     editScript.setDstCommitMessage(dstCommit.getFullMessage());
+
+    editScript.setAuthorName(dstCommit.getAuthorIdent().getName());
+    editScript.setAuthorEmail(dstCommit.getAuthorIdent().getEmailAddress());
+    editScript.setCommitDate(dstCommit.getAuthorIdent().getWhen());
 
     editScript.setProjectName(input.getProjectName());
 

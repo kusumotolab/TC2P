@@ -60,6 +60,9 @@ public class MiningEditPatternPresenter extends IMiningEditPatternPresenter<Cons
           .append(toString(label.getLabel()))
           .append(")\n");
     }
+
+    pattern.getTreeIds().forEach(url -> text.append(url).append(" "));
+
     view.print(text.toString());
   }
 

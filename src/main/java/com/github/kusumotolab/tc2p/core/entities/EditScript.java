@@ -2,6 +2,7 @@ package com.github.kusumotolab.tc2p.core.entities;
 
 import java.lang.reflect.Field;
 import java.sql.Types;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,8 +37,17 @@ public class EditScript extends SQLiteObject {
   @SQLiteColumn(type = Types.CHAR, name = "dst_name")
   private String dstName;
 
+  @SQLiteColumn(type = Types.CHAR, name = "author_name")
+  private String authorName;
+
+  @SQLiteColumn(type = Types.CHAR, name = "author_email")
+  private String authorEmail;
+
   @SQLiteColumn(type = Types.CHAR, name = "project_name", indexIds = {"project_name_index"})
   private String projectName;
+
+  @SQLiteColumn(type = Types.DATE, name = "commit_date")
+  private Date commitDate;
 
   @SQLiteColumn(type = Types.CHAR, name = "tree_node_ids")
   private List<Integer> treeNodeIds = Lists.newArrayList();

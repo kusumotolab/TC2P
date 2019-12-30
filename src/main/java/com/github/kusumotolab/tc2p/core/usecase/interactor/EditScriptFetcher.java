@@ -24,7 +24,7 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
 
   @Override
   public List<EditScript> execute(final Input input) {
-    final SQLite sqLite = new SQLite();
+    final SQLite sqLite = new SQLite("ignore/DB/" + input.getProjectName() + ".sqlite3");
     final Map<String, TreeNodeRawObject> treeNodeRawMap = createTreeNodeMap(input, sqLite);
     final Query<EditScript> query = createQuery(input);
 

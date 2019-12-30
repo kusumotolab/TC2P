@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,7 +73,12 @@ public abstract class SQLiteObject extends DBObject {
     final List<Column> columns = getColumns();
     for (final Column column : columns) {
       final String name = column.getName();
-      final Object value = resultSet.getObject(name);
+      final Object value;
+      if (column.getValue().type() == Types.DATE) {
+        value = resultSet.getDate(name);
+      } else {
+        value = resultSet.getObject(name);
+      }
       final Field field = column.getField();
       field.setAccessible(true);
 
