@@ -10,4 +10,8 @@ public class MiningConfiguration {
   @Getter
   @Option(name = "-r", aliases = "--repository", usage = "the repository path", handler = PathOptionHandler.class, required = true)
   private Path repository;
+
+  @Getter
+  @Option(name = "-c", aliases = "--commits", usage = "number of commits")
+  private Long numberOfCommits = Long.MAX_VALUE;
 }

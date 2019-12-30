@@ -1,7 +1,5 @@
 package com.github.kusumotolab.tc2p.core.usecase.interactor;
 
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

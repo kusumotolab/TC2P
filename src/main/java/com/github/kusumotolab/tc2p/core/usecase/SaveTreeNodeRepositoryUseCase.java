@@ -28,8 +28,9 @@ public class SaveTreeNodeRepositoryUseCase<V extends View, P extends IMiningRepo
   public void execute(final Input input) {
     final Path path = input.getRepositoryPath();
     final String projectName = path.getFileName().toString();
-    final MiningRepositoryInteractor.Input miningInput = new MiningRepositoryInteractor.Input(input.getRepositoryPath(), "master");
-    final Observable<CommitPair> commitPairs = new MiningRepositoryInteractor().execute(Observable.just(miningInput));
+    final MiningRepositoryInteractor.Input miningInput = new MiningRepositoryInteractor.Input(input.getRepositoryPath());
+    final Observable<CommitPair> commitPairs = new MiningRepositoryInteractor().execute(Observable.just(miningInput))
+        .take(input.getNumberOfCommits());
 
     final GumTreeExecutor gumTreeExecutor = new GumTreeExecutor(input.getRepositoryPath());
     final Observable<SaveEditScriptInteractor.Input> inputObservable = commitPairs

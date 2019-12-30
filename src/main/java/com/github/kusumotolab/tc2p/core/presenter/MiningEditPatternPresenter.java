@@ -61,8 +61,13 @@ public class MiningEditPatternPresenter extends IMiningEditPatternPresenter<Cons
           .append(")\n");
     }
 
-    pattern.getTreeIds().forEach(url -> text.append(url).append(" "));
+    int index = 1;
+    for (final String treeId : pattern.getTreeIds()) {
+      text.append(index).append(": ").append(treeId).append("\n");
+      index += 1;
+    }
 
+    text.append("\n");
     view.print(text.toString());
   }
 

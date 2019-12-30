@@ -16,5 +16,6 @@ public abstract class IMiningRepositoryUseCase<V extends View, P extends IMining
   @Data
   public static class Input {
     private final Path repositoryPath;
+    private final long numberOfCommits;
   }
 }

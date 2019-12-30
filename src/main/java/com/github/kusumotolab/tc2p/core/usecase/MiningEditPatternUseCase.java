@@ -89,8 +89,10 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
     final String[] split = editScript.getProjectName().split("__");
     final String userName = split[0];
     final String repositoryName = split[1];
-    return "https://github.com/" + userName + "/" + repositoryName + "/commit/" + extractCommitIdFromFinerGitCommitMessage(
-        editScript.getDstCommitMessage());
+    final String repositoryBaseURL = "https://github.com/" + userName + "/" + repositoryName;
+    return repositoryBaseURL + "/compare/" + extractCommitIdFromFinerGitCommitMessage(editScript.getSrcCommitMessage()) + "..."
+        + extractCommitIdFromFinerGitCommitMessage(editScript.getDstCommitMessage())
+        + "    // " + editScript.getSrcName() + " <=> " + editScript.getDstName();
   }
 
   private String extractCommitIdFromFinerGitCommitMessage(final String commitMessage) {

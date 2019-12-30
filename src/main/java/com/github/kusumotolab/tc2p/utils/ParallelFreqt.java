@@ -84,17 +84,18 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     final Multimap<ASTLabel, String> idMap = HashMultimap.create();
     final Map<ASTLabel, Integer> map = trees.parallelStream()
         .map(Node::getDescents)
-        .flatMap(e -> e.stream().distinct())// TODO: 2019/12/29 各木のカウントの回数を高々1回にする
-        .peek(node -> {
-          final Label<ASTLabel> label = new Label<>(0, node.getLabel());
-          synchronized (countPatternCache) {
-            countPatternCache.put(Lists.newArrayList(label), node);
-          }
-          synchronized (idMap) {
-            idMap.put(node.getLabel(), node.getTreeId());
-          }
-        })
-        .map(Node::getLabel)
+        .flatMap(descents -> descents.stream()
+            .peek(node -> {
+              final Label<ASTLabel> label = new Label<>(0, node.getLabel());
+              synchronized (countPatternCache) {
+                countPatternCache.put(Lists.newArrayList(label), node);
+              }
+              synchronized (idMap) {
+                idMap.put(node.getLabel(), node.getTreeId());
+              }
+            })
+            .distinct()
+            .map(Node::getLabel))
         .collect(Collectors.toMap(e -> e, e -> 1, Integer::sum));
 
     return map.entrySet()
@@ -132,8 +133,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
         final Set<Node<ASTLabel>> candidates = Sets.newHashSet();
         for (final TreePattern<ASTLabel> element2 : f1) {
           final Node<ASTLabel> root = Node.createRootNode(treeId, label);
-          root.createChildNode(element2.getRootNode()
-              .getLabel());
+          root.createChildNode(element2.getRootNode().getLabel());
           candidates.add(root);
         }
         return candidates;
@@ -255,22 +255,29 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
   private CountResult countPattern(final Node<ASTLabel> subtree, final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
     final List<Label<ASTLabel>> subtreeLabels = Lists.newArrayList(subtree.getLabels());
     subtreeLabels.remove(subtreeLabels.size() - 1);
+
+    final Set<String> rootIds = Sets.newHashSet();
     return countPatternCache.get(subtreeLabels).stream()
         .map(node -> {
-          final int countPatterns = node.countPatterns(subtree);
-          if (countPatterns > 0) {
+          final boolean contains = node.contains(subtree);
+          if (contains) {
             final List<Label<ASTLabel>> labels = subtree.getLabels();
             synchronized (countPatternCache) {
               countPatternCache.put(labels, node);
             }
           }
-          return new CountResult(Math.min(1, countPatterns), Sets.newHashSet(node.getTreeId()));
+          return new CountResult(contains ? 1 : 0, Sets.newHashSet(node.getTreeId()));
         })
-        .reduce((e1, e2) -> {
-          final Set<String> ids = Sets.newHashSet(e1.ids);
-          ids.addAll(e2.ids);
-          return new CountResult(e1.count + e2.count, ids);
-        }).orElse(new CountResult(0, Collections.emptySet()));
+        .filter(e -> e.count > 0)
+        .filter(countResult -> {
+          if (rootIds.containsAll(countResult.ids)) {
+            return false;
+          }
+          rootIds.addAll(countResult.ids);
+          return true;
+        })
+        .reduce((e1, e2) -> new CountResult(e1.count + e2.count, Sets.union(e1.ids, e2.ids)))
+        .orElse(new CountResult(0, Collections.emptySet()));
   }
 
   private void removeUnnecessaryCache(final int removeSize, final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
@@ -291,7 +298,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
               continue;
             }
             final Node<ASTLabel> newRootNode = newPattern.getRootNode();
-            if (newRootNode.countPatterns(oldPattern.getRootNode()) > 0) {
+            if (newRootNode.contains(oldPattern.getRootNode())) {
               removedPattern.add(oldPattern);
             }
           }
@@ -303,8 +310,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
     final Set<Node<ASTLabel>> removedSet = roots.parallelStream()
         .filter(root -> {
           for (final TreePattern<ASTLabel> pattern : f1) {
-            final int countPatterns = root.countPatterns(pattern.getRootNode());
-            if (countPatterns >= 1) {
+            if (root.contains(pattern.getRootNode())) {
               return true;
             }
           }

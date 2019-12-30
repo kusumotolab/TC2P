@@ -25,8 +25,8 @@ public class GitClient {
     return Try.optional(() -> new GitClient(path.resolve(".git")));
   }
 
-  public Observable<RevCommit> log(final String id) {
-    return new GitLog(repository).execute(id);
+  public Observable<RevCommit> log() {
+    return new GitLog(repository).execute("");
   }
 
   public Observable<CommitLog> logWithFollow(final Path filePath) {

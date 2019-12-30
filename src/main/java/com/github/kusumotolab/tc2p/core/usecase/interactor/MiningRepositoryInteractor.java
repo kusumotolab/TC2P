@@ -19,7 +19,7 @@ public class MiningRepositoryInteractor implements Interactor<Observable<Input>,
         return Observable.empty();
       }
       final GitClient gitClient = optionalGitClient.get();
-      return gitClient.log(input.getBranch());
+      return gitClient.log();
     }).scan(new CommitPair(null, null), (pair, revCommit) -> new CommitPair(revCommit, pair.getSrcCommit()))
         .filter(e -> e.getDstCommit() != null && e.getSrcCommit() != null);
   }
@@ -27,6 +27,5 @@ public class MiningRepositoryInteractor implements Interactor<Observable<Input>,
   @Data
   public static class Input {
     private final Path repositoryPath;
-    private final String branch;
   }
 }

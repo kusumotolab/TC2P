@@ -16,6 +16,7 @@ public class MiningController<V extends View, P extends IMiningRepositoryPresent
 
   @Override
   public void exec(final String[] args) {
-    parse(new MiningConfiguration(), args, configuration -> useCase.execute(new Input(configuration.getRepository())));
+    parse(new MiningConfiguration(), args,
+        configuration -> useCase.execute(new Input(configuration.getRepository(), configuration.getNumberOfCommits())));
   }
 }
