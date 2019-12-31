@@ -6,8 +6,10 @@ timeout=$3
 
 mkdir -p ignore/results
 
-command=$(echo java -jar build/libs/TC2P-alpha.jar mining -p $project -f $frequency | tee ignore/results/$project__$frequency.txt)
+command=$(echo java -jar -Xmx56G build/libs/TC2P-alpha.jar mining -p $project -f $frequency)
 
-echo $command
-
-$command
+(
+    echo $command
+    echo ""
+    timeout $timeout $command
+) 2>&1 | tee ignore/results/$(echo $project)__$frequency.txt
