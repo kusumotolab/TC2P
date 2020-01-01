@@ -129,8 +129,14 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
       final String treeId = element1.getRootNode().getTreeId();
       final ASTLabel label = element1.getRootNode().getLabel();
 
+      // SimpleNameの下にノードは存在しない
+      if (label.getType().equals("SimpleName")) {
+        continue;
+      }
+
       futures.add(threadPool.submit(() -> {
         final Set<Node<ASTLabel>> candidates = Sets.newHashSet();
+
         for (final TreePattern<ASTLabel> element2 : f1) {
           final Node<ASTLabel> root = Node.createRootNode(treeId, label);
           root.createChildNode(element2.getRootNode().getLabel());
@@ -140,7 +146,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
       }));
     }
 
-    final Set<Node<ASTLabel>> candidates = futures.stream()
+    final Set<Node<ASTLabel>> candidates = futures.parallelStream()
         .map(future -> Try.force(future::get))
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
@@ -176,6 +182,11 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
       futures.add(threadPool.submit(() -> {
         final Set<Node<ASTLabel>> results = Sets.newHashSet();
         for (int index = 0; index < rightMostBranch.size(); index++) {
+          final Node<ASTLabel> extendNode = rightMostBranch.get(index);
+          if (extendNode.getLabel().getType().equals("SimpleName")) {
+            continue;
+          }
+
           // Nodeのタイプとf2から挿入するラベルを選ぶ
           final List<ASTLabel> rightMostBranchKey = Lists
               .newArrayList(rightMostBranch.subList(0, index + 1)).stream()
@@ -198,7 +209,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
       }));
     }
 
-    final Set<Node<ASTLabel>> candidates = futures.stream()
+    final Set<Node<ASTLabel>> candidates = futures.parallelStream()
         .map(future -> Try.force(future::get))
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
@@ -215,7 +226,7 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
           return new TreePattern<>(candidate, countResult.getIds(), countResult.getCount());
         })).collect(Collectors.toList());
 
-    return futures.stream()
+    return futures.parallelStream()
         .map(future -> Try.force(future::get))
         .filter(pattern -> filterPattern(pattern, borderline))
         .collect(Collectors.toSet());
@@ -311,10 +322,10 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
         .filter(root -> {
           for (final TreePattern<ASTLabel> pattern : f1) {
             if (root.contains(pattern.getRootNode())) {
-              return true;
+              return false;
             }
           }
-          return false;
+          return true;
         }).collect(Collectors.toSet());
     roots.removeAll(removedSet);
   }

@@ -20,7 +20,9 @@ public class MiningRepositoryInteractor implements Interactor<Observable<Input>,
       }
       final GitClient gitClient = optionalGitClient.get();
       return gitClient.log();
-    }).scan(new CommitPair(null, null), (pair, revCommit) -> new CommitPair(revCommit, pair.getSrcCommit()))
+    })
+        .filter(e -> e.getParentCount() == 1)
+        .map(e -> new CommitPair(e.getParent(0), e))
         .filter(e -> e.getDstCommit() != null && e.getSrcCommit() != null);
   }
 
