@@ -10,6 +10,8 @@ import com.github.kusumotolab.tc2p.core.usecase.MiningEditPatternUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.SaveTreeNodeRepositoryUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ViewerUseCase;
 import com.github.kusumotolab.tc2p.core.view.ConsoleView;
+import com.github.kusumotolab.tc2p.core.view.InteractiveConsoleView;
+import com.github.kusumotolab.tc2p.service.ServiceGraph.ServiceGraphWithView;
 
 public class Services {
 
@@ -28,11 +30,20 @@ public class Services {
       .resolve();
 
   @Service(name = "view")
-  private static final ServiceGraph<?, ?, ?, ?> view = ServiceGraph.view(ConsoleView::new)
-      .presenter(ViewPresenter::new)
-      .useCase(ViewerUseCase::new)
-      .controller(ViewerController::new)
-      .resolve();
+  private static final ServiceGraph<?, ?, ?, ?> view;
+
+  static {
+    final InteractiveConsoleView consoleView = new InteractiveConsoleView();
+    view = ServiceGraph.view(() -> consoleView)
+        .presenter(ViewPresenter::new)
+        .useCase(ViewerUseCase::new)
+        .controller(e -> {
+          final ViewerController<InteractiveConsoleView, ViewPresenter> controller = new ViewerController<>(e);
+          consoleView.setController(controller);
+          return controller;
+        })
+        .resolve();
+  }
 
   private static final Services instance = new Services();
 

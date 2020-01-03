@@ -6,22 +6,23 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Label;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
-import com.github.kusumotolab.tc2p.core.view.ConsoleView;
+import com.github.kusumotolab.tc2p.core.view.InteractiveConsoleView;
 import com.github.kusumotolab.tc2p.utils.Colors;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-public class ViewPresenter extends IViewPresenter<ConsoleView> {
+public class ViewPresenter extends IViewPresenter<InteractiveConsoleView> {
 
-  public ViewPresenter(final ConsoleView view) {
+  public ViewPresenter(final InteractiveConsoleView view) {
     super(view);
   }
 
   @Override
   public void show(final MiningResult result) {
-    view.print(result.getProjectName() + ": " + result.getFrequency());
+    view.print("project = " + result.getProjectName());
+    view.print("frequency = " + result.getFrequency());
     view.print("max_depth = " + result.getMaxDepth());
     view.print("max_size = " + result.getSize());
     final StringBuilder text = new StringBuilder("\n");
@@ -34,12 +35,13 @@ public class ViewPresenter extends IViewPresenter<ConsoleView> {
           .append(")\n");
     }
     view.print(text.toString());
-    for (final String url : result.getUrls()) {
-      view.print(url);
-    }
+    view.print("");
   }
 
-
+  @Override
+  public void observeInput() {
+    view.observeReader();
+  }
 
   private String toString(final ASTLabel label) {
     final List<Column> columns = Lists.newArrayList();

@@ -11,4 +11,6 @@ public abstract class IViewPresenter<V extends View> extends Presenter<V> {
   }
 
   public abstract void show(final MiningResult result);
+
+  public abstract void observeInput();
 }

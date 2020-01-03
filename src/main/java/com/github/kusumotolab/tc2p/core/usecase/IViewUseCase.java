@@ -10,4 +10,12 @@ public abstract class IViewUseCase <V extends View, P extends Presenter<V>> exte
   public IViewUseCase(final P presenter) {
     super(presenter);
   }
+
+  public abstract void next();
+
+  public abstract void previous();
+
+  public abstract void open();
+
+  public abstract void addComment(final String comment);
 }
