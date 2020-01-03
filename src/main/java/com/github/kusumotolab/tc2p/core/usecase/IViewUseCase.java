@@ -1,0 +1,13 @@
+package com.github.kusumotolab.tc2p.core.usecase;
+
+import com.github.kusumotolab.tc2p.core.configuration.ViewerConfiguration;
+import com.github.kusumotolab.tc2p.framework.Presenter;
+import com.github.kusumotolab.tc2p.framework.UseCase;
+import com.github.kusumotolab.tc2p.framework.View;
+
+public abstract class IViewUseCase <V extends View, P extends Presenter<V>> extends UseCase<ViewerConfiguration, V, P> {
+
+  public IViewUseCase(final P presenter) {
+    super(presenter);
+  }
+}

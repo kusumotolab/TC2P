@@ -6,7 +6,6 @@ import com.github.kusumotolab.tc2p.core.usecase.interactor.TreeNodeFetcher.Input
 import com.github.kusumotolab.tc2p.tools.db.Query;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteCondition;
-import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteLikeCondition;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition.RelationalOperator;

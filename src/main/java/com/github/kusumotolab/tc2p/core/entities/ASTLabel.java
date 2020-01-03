@@ -3,7 +3,9 @@ package com.github.kusumotolab.tc2p.core.entities;
 import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @EqualsAndHashCode(of = {"actions", "value", "newValue", "type"})
 public class ASTLabel {
 

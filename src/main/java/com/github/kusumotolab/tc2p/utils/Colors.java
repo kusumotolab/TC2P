@@ -42,4 +42,17 @@ public enum Colors {
   private static String toColorCode(final Colors color, final String text) {
     return color.colorCode + text + endCode;
   }
+
+  public static String removeColorCode(final String text) {
+    String string = text;
+    for (final Colors value : Colors.values()) {
+      while (string.contains(value.colorCode)) {
+        string = string.replace(value.colorCode, "");
+      }
+    }
+    while (string.contains(endCode)) {
+      string = string.replace(endCode, "");
+    }
+    return string;
+  }
 }
