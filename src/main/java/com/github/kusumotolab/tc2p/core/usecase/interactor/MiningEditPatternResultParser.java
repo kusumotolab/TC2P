@@ -24,7 +24,8 @@ public class MiningEditPatternResultParser implements Interactor<Input, List<Min
     int maxDepth = 0;
     List<String> urls = Lists.newArrayList();
     List<Label<ASTLabel>> astLabels = Lists.newArrayList();
-    int id = 0;
+    int nodeId = 0;
+    int patternId = 0;
     final Map<Integer, Integer> depthIoId = Maps.newHashMap();
 
     for (final String _line : input.lines) {
@@ -54,8 +55,8 @@ public class MiningEditPatternResultParser implements Interactor<Input, List<Min
         final List<ActionEnum> actionEnums = Lists.newArrayList();
 
         final String[] strings = line.substring(line.indexOf("(") + 1, line.indexOf(")")).split("}, ");
-        for (int i = 0; i < strings.length; i++) {
-          String text = strings[i];
+        for (final String string : strings) {
+          String text = string;
           if (!text.endsWith("}")) {
             text += "}";
           }
@@ -85,10 +86,10 @@ public class MiningEditPatternResultParser implements Interactor<Input, List<Min
             newValue = valueText.substring(2, valueText.length() - 2);
           }
         }
-        id += 1;
-        depthIoId.put(depth, id);
+        nodeId += 1;
+        depthIoId.put(depth, nodeId);
         final int parentId = depthIoId.getOrDefault(depth - 1, -1);
-        astLabels.add(new Label<>(depth, new ASTLabel(id, parentId, actionEnums, value, newValue, type)));
+        astLabels.add(new Label<>(depth, new ASTLabel(nodeId, parentId, actionEnums, value, newValue, type)));
         continue;
       }
 
@@ -101,12 +102,13 @@ public class MiningEditPatternResultParser implements Interactor<Input, List<Min
         if (astLabels.isEmpty()) {
           continue;
         }
-        final MiningResult miningResult = new MiningResult(projectName, frequency, maxDepth, id, Node.createTree(projectName, astLabels),
+        final MiningResult miningResult = new MiningResult(patternId, projectName, frequency, maxDepth, nodeId, Node.createTree(projectName, astLabels),
             urls);
         results.add(miningResult);
+        patternId += 1;
         frequency = 0;
         maxDepth = 0;
-        id = 0;
+        nodeId = 0;
         astLabels = Lists.newArrayList();
         urls = Lists.newArrayList();
       }

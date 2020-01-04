@@ -8,6 +8,6 @@ import lombok.Getter;
 public class ViewerConfiguration {
 
   @Getter
-  @Option(name = "-i", aliases = "--input", usage = "the results file", required = true, handler = PathOptionHandler.class)
+  @Option(name = "-i", aliases = "--input", usage = "the results file (json)", required = true, handler = PathOptionHandler.class)
   private Path inputFilePath;
 }

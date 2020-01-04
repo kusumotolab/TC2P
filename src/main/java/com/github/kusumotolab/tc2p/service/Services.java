@@ -1,17 +1,18 @@
 package com.github.kusumotolab.tc2p.service;
 
+import com.github.kusumotolab.tc2p.core.controller.ConvertJsonController;
 import com.github.kusumotolab.tc2p.core.controller.MiningController;
 import com.github.kusumotolab.tc2p.core.controller.MiningEditPatternController;
 import com.github.kusumotolab.tc2p.core.controller.ViewerController;
 import com.github.kusumotolab.tc2p.core.presenter.MiningEditPatternPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.MiningRepositoryPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.ViewPresenter;
+import com.github.kusumotolab.tc2p.core.usecase.ConvertToJsonUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.MiningEditPatternUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.SaveTreeNodeRepositoryUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ViewerUseCase;
 import com.github.kusumotolab.tc2p.core.view.ConsoleView;
 import com.github.kusumotolab.tc2p.core.view.InteractiveConsoleView;
-import com.github.kusumotolab.tc2p.service.ServiceGraph.ServiceGraphWithView;
 
 public class Services {
 
@@ -31,6 +32,13 @@ public class Services {
 
   @Service(name = "view")
   private static final ServiceGraph<?, ?, ?, ?> view;
+
+  @Service(name = "convert")
+  private static final ServiceGraph<?, ?, ?, ?> convert = ServiceGraph.view(ConsoleView::new)
+      .presenter(MiningEditPatternPresenter::new)
+      .useCase(ConvertToJsonUseCase::new)
+      .controller(ConvertJsonController::new)
+      .resolve();
 
   static {
     final InteractiveConsoleView consoleView = new InteractiveConsoleView();

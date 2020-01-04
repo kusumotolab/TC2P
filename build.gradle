@@ -22,6 +22,7 @@ dependencies {
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
     compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.4.0.201906121030-r'
     compile 'org.jline:jline:3.13.2'
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     compile group: 'com.github.gumtreediff', name: 'client', version: '2.1.0'
     compile group: 'org.eclipse.jdt', name: 'org.eclipse.jdt.core', version: '3.18.0'
