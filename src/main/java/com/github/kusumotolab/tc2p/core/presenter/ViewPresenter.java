@@ -22,8 +22,8 @@ public class ViewPresenter extends IViewPresenter<InteractiveConsoleView> {
   @Override
   public void show(final MiningResult result, final int index) {
     view.clear();
-    view.print("id = " + result.getId());
     view.print("index = " + index);
+    view.print("id = " + result.getId());
     view.print("project = " + result.getProjectName());
     view.print("frequency = " + result.getFrequency());
     view.print("max_depth = " + result.getMaxDepth());
