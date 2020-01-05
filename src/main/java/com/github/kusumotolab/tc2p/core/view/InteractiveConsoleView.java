@@ -56,7 +56,7 @@ public class InteractiveConsoleView implements View {
     isStandby = true;
     while (isStandby) {
       final String comment = reader.readLine("comment > ");
-      controller.command(comment);
+      controller.command(comment.trim());
       terminal.flush();
     }
   }

@@ -6,14 +6,13 @@ import com.github.kusumotolab.tc2p.core.entities.MiningResult;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.MiningEditPatternResultParser;
 import com.github.kusumotolab.tc2p.framework.Presenter;
 import com.github.kusumotolab.tc2p.framework.View;
-import com.github.kusumotolab.tc2p.tools.gson.GsonFactory;
-import com.github.kusumotolab.tc2p.utils.FileUtil;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
 import com.github.kusumotolab.tc2p.utils.Try;
-import com.google.gson.Gson;
+import io.reactivex.Observable;
 
-public class ConvertToJsonUseCase<V extends View, P extends Presenter<V>> extends IConvertUseCase<V, P> {
+public class ConvertToSQLiteUseCase<V extends View, P extends Presenter<V>> extends IConvertUseCase<V, P> {
 
-  public ConvertToJsonUseCase(final P presenter) {
+  public ConvertToSQLiteUseCase(final P presenter) {
     super(presenter);
   }
 
@@ -23,9 +22,11 @@ public class ConvertToJsonUseCase<V extends View, P extends Presenter<V>> extend
     final MiningEditPatternResultParser.Input parserInput = new MiningEditPatternResultParser.Input(allLines);
     final List<MiningResult> miningResults = new MiningEditPatternResultParser().execute(parserInput);
 
-    final Gson gson = GsonFactory.create();
-
-    final String json = gson.toJson(miningResults);
-    FileUtil.overWrite(input.getOutputPath(), json);
+    final SQLite sqLite = new SQLite(input.getOutputPath().toString());
+    sqLite.connect()
+        .andThen(sqLite.createTable(MiningResult.class))
+        .andThen(sqLite.insert(Observable.fromIterable(miningResults)))
+        .andThen(sqLite.close())
+        .blockingAwait();
   }
 }

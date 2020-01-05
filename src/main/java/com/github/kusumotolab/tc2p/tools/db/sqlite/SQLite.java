@@ -10,6 +10,7 @@ import com.github.kusumotolab.tc2p.tools.db.Query;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.commands.SQLCreateTableExecutor;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.commands.SQLInsertExecutor;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.commands.SQLSelectExecutor;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.commands.SQLiteUpdateExecutor;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -95,7 +96,7 @@ public class SQLite implements DB<SQLiteObject> {
 
   @Override
   public <Model extends SQLiteObject> Completable update(final Observable<Model> object) {
-    throw new UnsupportedOperationException();
+    return new SQLiteUpdateExecutor(this).update(object);
   }
 
   @Override

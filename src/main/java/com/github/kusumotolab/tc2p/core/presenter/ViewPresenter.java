@@ -23,10 +23,15 @@ public class ViewPresenter extends IViewPresenter<InteractiveConsoleView> {
   public void show(final MiningResult result, final int index) {
     view.clear();
     view.print("id = " + result.getId());
+    view.print("index = " + index);
     view.print("project = " + result.getProjectName());
     view.print("frequency = " + result.getFrequency());
     view.print("max_depth = " + result.getMaxDepth());
     view.print("max_size = " + result.getSize());
+    if (result.getComment() != null) {
+      view.print("comment = " + result.getComment());
+    }
+
     final StringBuilder text = new StringBuilder("\n");
     for (final Label<ASTLabel> label : result.getRoot().getLabels()) {
       final String indent = Strings.repeat(" ", 2 * label.getDepth());
@@ -37,10 +42,7 @@ public class ViewPresenter extends IViewPresenter<InteractiveConsoleView> {
           .append(")\n");
     }
     view.print(text.toString());
-    view.print("\nindex = " + index);
-    if (result.getComment() != null) {
-      view.print("comment = " + result.getComment());
-    }
+    view.print("");
   }
 
   @Override

@@ -1,6 +1,6 @@
 package com.github.kusumotolab.tc2p.service;
 
-import com.github.kusumotolab.tc2p.core.controller.ConvertJsonController;
+import com.github.kusumotolab.tc2p.core.controller.ConvertController;
 import com.github.kusumotolab.tc2p.core.controller.MiningController;
 import com.github.kusumotolab.tc2p.core.controller.MiningEditPatternController;
 import com.github.kusumotolab.tc2p.core.controller.ViewerController;
@@ -8,6 +8,7 @@ import com.github.kusumotolab.tc2p.core.presenter.MiningEditPatternPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.MiningRepositoryPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.ViewPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.ConvertToJsonUseCase;
+import com.github.kusumotolab.tc2p.core.usecase.ConvertToSQLiteUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.MiningEditPatternUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.SaveTreeNodeRepositoryUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ViewerUseCase;
@@ -33,11 +34,18 @@ public class Services {
   @Service(name = "view")
   private static final ServiceGraph<?, ?, ?, ?> view;
 
-  @Service(name = "convert")
-  private static final ServiceGraph<?, ?, ?, ?> convert = ServiceGraph.view(ConsoleView::new)
+  @Service(name = "convert-json")
+  private static final ServiceGraph<?, ?, ?, ?> convert_json = ServiceGraph.view(ConsoleView::new)
       .presenter(MiningEditPatternPresenter::new)
       .useCase(ConvertToJsonUseCase::new)
-      .controller(ConvertJsonController::new)
+      .controller(ConvertController::new)
+      .resolve();
+
+  @Service(name = "convert-sqlite")
+  private static final ServiceGraph<?, ?, ?, ?> convert_sqlite = ServiceGraph.view(ConsoleView::new)
+      .presenter(MiningEditPatternPresenter::new)
+      .useCase(ConvertToSQLiteUseCase::new)
+      .controller(ConvertController::new)
       .resolve();
 
   static {

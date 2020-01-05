@@ -1,28 +1,26 @@
 package com.github.kusumotolab.tc2p.core.usecase;
 
-import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import com.github.kusumotolab.sdl4j.util.CommandLine;
 import com.github.kusumotolab.tc2p.core.configuration.ViewerConfiguration;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
 import com.github.kusumotolab.tc2p.core.presenter.IViewPresenter;
 import com.github.kusumotolab.tc2p.framework.View;
-import com.github.kusumotolab.tc2p.tools.gson.GsonFactory;
-import com.github.kusumotolab.tc2p.utils.FileUtil;
+import com.github.kusumotolab.tc2p.tools.db.Query;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery.Builder;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition.RelationalOperator;
 import com.github.kusumotolab.tc2p.utils.Try;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import io.reactivex.Observable;
 
 public class ViewerUseCase<V extends View, P extends IViewPresenter<V>> extends IViewUseCase<V, P> {
 
   private List<MiningResult> miningResults = Lists.newArrayList();
   private int index = 0;
-  private Path jsonPath;
+  private SQLite sqLite;
 
   public ViewerUseCase(final P presenter) {
     super(presenter);
@@ -30,26 +28,44 @@ public class ViewerUseCase<V extends View, P extends IViewPresenter<V>> extends 
 
   @Override
   public void execute(final ViewerConfiguration viewerConfiguration) {
-    this.jsonPath = viewerConfiguration.getInputFilePath();
-    final String json = Try.force(() -> Files.readString(viewerConfiguration.getInputFilePath()));
-    final Gson gson = GsonFactory.create();
+    sqLite = new SQLite(viewerConfiguration.getInputFilePath().toString());
+    this.miningResults = sqLite.connect()
+        .andThen(sqLite.fetch(createQuery(viewerConfiguration)))
+        .toList()
+        .blockingGet();
 
-    final Type collectionType = new TypeToken<List<MiningResult>>(){}.getType();
-    final List<MiningResult> miningResults = gson.fromJson(json, collectionType);
-
-    final List<MiningResult> tmpMiningResults = miningResults.stream()
-        .filter(e -> !e.isDeleted())
-//        .sorted(Comparator.comparingInt(MiningResult::getSize).reversed())
-        .collect(Collectors.toList());
-
-    if (tmpMiningResults.isEmpty()) {
+    if (miningResults.isEmpty()) {
       return;
     }
-
-    this.miningResults = tmpMiningResults;
     index = 0;
     presenter.show(this.miningResults.get(0), index);
     presenter.observeInput();
+  }
+
+  private Query<MiningResult> createQuery(final ViewerConfiguration configuration) {
+    Builder<MiningResult> queryBuilder = SQLiteQuery.select(MiningResult.class).from(MiningResult.class);
+
+    if (configuration.isShowOnlyCommented()) {
+      queryBuilder = queryBuilder.where(new SQLiteRelationalCondition("comment", RelationalOperator.NOT_EQUAL, ""));
+    } else if (!configuration.isShowAll()) {
+      queryBuilder = queryBuilder.where(new SQLiteRelationalCondition("is_deleted", RelationalOperator.NOT_EQUAL, "1"));
+    }
+
+    switch (configuration.getSort()) {
+      case SIZE:
+        queryBuilder = queryBuilder.orderBy("size", !configuration.isReverse());
+        break;
+      case INDEX:
+        queryBuilder = queryBuilder.orderBy("id", !configuration.isReverse());
+        break;
+      case DEPTH:
+        queryBuilder = queryBuilder.orderBy("max_depth", !configuration.isReverse());
+        break;
+      case FREQUENCY:
+        queryBuilder = queryBuilder.orderBy("frequency", !configuration.isReverse());
+    }
+
+    return queryBuilder.build();
   }
 
   @Override
@@ -90,7 +106,10 @@ public class ViewerUseCase<V extends View, P extends IViewPresenter<V>> extends 
 
   @Override
   public void delete() {
-    miningResults.get(index).setDeleted(true);
+    final MiningResult result = miningResults.get(index);
+    result.setDeleted(true);
+    sqLite.update(Observable.just(result)).blockingAwait();
+
     miningResults.remove(index);
     if (miningResults.isEmpty()) {
       finish();
@@ -102,17 +121,15 @@ public class ViewerUseCase<V extends View, P extends IViewPresenter<V>> extends 
 
   @Override
   public void finish() {
-    miningResults.sort(Comparator.comparingInt(MiningResult::getId));
-    final Gson gson = GsonFactory.create();
-
-    final String json = gson.toJson(miningResults);
-    FileUtil.overWrite(jsonPath, json);
-    presenter.finish();
+    sqLite.close().subscribe(presenter::finish);
   }
 
   @Override
   public void addComment(final String comment) {
-    miningResults.get(index).setComment(comment);
+    final MiningResult miningResult = miningResults.get(index);
+    miningResult.setComment(comment);
+    sqLite.update(Observable.just(miningResult))
+        .blockingAwait();
     next();
   }
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import com.github.kusumotolab.tc2p.tools.db.DBObject;
+import com.github.kusumotolab.tc2p.utils.Try;
 
 public abstract class SQLiteObject extends DBObject {
 
@@ -33,8 +34,7 @@ public abstract class SQLiteObject extends DBObject {
         .collect(Collectors.toList());
   }
 
-  public void addBatchCommand(final PreparedStatement preparedStatement)
-      throws SQLException, IllegalAccessException {
+  public void addBatchCommand(final PreparedStatement preparedStatement) throws SQLException, IllegalAccessException {
     final List<Column> columns = getColumns();
     for (int i = 0; i < columns.size(); i++) {
       final Column column = columns.get(i);
@@ -47,13 +47,39 @@ public abstract class SQLiteObject extends DBObject {
     preparedStatement.addBatch();
   }
 
+  public void addBatchUpdateCommand(final PreparedStatement preparedStatement) throws SQLException, IllegalAccessException {
+    final List<Column> columns = getColumns();
+    final List<Column> values = columns.stream()
+        .filter(e -> !e.getValue().primaryKey())
+        .collect(Collectors.toList());
+    for (int i = 0; i < values.size(); i++) {
+      final Column column = values.get(i);
+      final Field field = column.getField();
+      field.setAccessible(true);
+      final Object value = field.get(this);
+      preparedStatement.setObject(i + 1, encodeField(value ,field));
+    }
+
+    final List<Column> primaryKeys = columns.stream()
+        .filter(e -> e.getValue().primaryKey())
+        .collect(Collectors.toList());
+    for (int i = 0; i < primaryKeys.size(); i++) {
+      final Column column = primaryKeys.get(i);
+      final Field field = column.getField();
+      field.setAccessible(true);
+      final Object value = field.get(this);
+      preparedStatement.setObject(values.size() + i + 1, encodeField(value ,field));
+    }
+    preparedStatement.addBatch();
+  }
+
   protected Object encodeField(final Object value, final Field field) {
     return value;
   }
 
   public String prepareStatementCommand() {
-    final StringBuilder stringBuilder = new StringBuilder("INSERT OR IGNORE INTO ").append(
-        getDBName())
+    final StringBuilder stringBuilder = new StringBuilder("INSERT OR IGNORE INTO ")
+        .append(getDBName())
         .append(" VALUES(");
     final List<String> columns = getColumns().stream()
         .map(Column::getValue)
@@ -69,6 +95,25 @@ public abstract class SQLiteObject extends DBObject {
     return stringBuilder.toString();
   }
 
+  public String prepareUpdateStatementCommand() {
+    final StringBuilder statement = new StringBuilder("UPDATE ")
+        .append(getDBName())
+        .append(" SET ");
+    final String values = getColumns().stream()
+        .filter(e -> !e.getValue().primaryKey())
+        .map(column -> column.getName() + " = ?")
+        .collect(Collectors.joining(", "));
+
+    statement.append(values)
+        .append(" WHERE ");
+    final String wheres = getColumns().stream()
+        .filter(e -> e.getValue().primaryKey())
+        .map(column -> column.getName() + " = ?")
+        .collect(Collectors.joining(", "));
+    statement.append(wheres);
+    return statement.toString();
+  }
+
   public void decode(final ResultSet resultSet) throws SQLException, IllegalAccessException {
     final List<Column> columns = getColumns();
     for (final Column column : columns) {
@@ -76,6 +121,8 @@ public abstract class SQLiteObject extends DBObject {
       final Object value;
       if (column.getValue().type() == Types.DATE) {
         value = resultSet.getDate(name);
+      } else if (column.getValue().type() == Types.BOOLEAN) {
+        value = resultSet.getBoolean(name);
       } else {
         value = resultSet.getObject(name);
       }

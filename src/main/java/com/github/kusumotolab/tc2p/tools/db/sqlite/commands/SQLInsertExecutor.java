@@ -28,8 +28,7 @@ public class SQLInsertExecutor extends SQLCommandExecutor {
               connection.setAutoCommit(false);
               final SQLiteObject sampleObject = list.get(0);
               final String prepareStatementCommand = sampleObject.prepareStatementCommand();
-              final PreparedStatement prepareStatement = connection.prepareStatement(
-                  prepareStatementCommand);
+              final PreparedStatement prepareStatement = connection.prepareStatement(prepareStatementCommand);
 
               for (final SQLiteObject object : list) {
                 object.addBatchCommand(prepareStatement);
