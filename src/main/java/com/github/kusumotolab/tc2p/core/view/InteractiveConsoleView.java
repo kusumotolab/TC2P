@@ -22,15 +22,16 @@ public class InteractiveConsoleView implements View {
 
   public InteractiveConsoleView() {
     this.reader = LineReaderBuilder.builder().terminal(terminal).completer(new StringsCompleter("delete")).build();
-    reader.getKeyMaps().get(LineReader.MAIN).bind((Widget) () -> {
-      controller.previous();
-      return true;
-    }, KeyMap.ctrl('k'));
 
     reader.getKeyMaps().get(LineReader.MAIN).bind((Widget) () -> {
       controller.previous();
       return true;
     }, KeyMap.ctrl('j'));
+
+    reader.getKeyMaps().get(LineReader.MAIN).bind((Widget) () -> {
+      controller.next();
+      return true;
+    }, KeyMap.ctrl('k'));
 
     reader.getKeyMaps().get(LineReader.MAIN).bind((Widget) () -> {
       controller.openInstance();
