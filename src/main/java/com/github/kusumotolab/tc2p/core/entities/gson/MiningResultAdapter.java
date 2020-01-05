@@ -27,6 +27,7 @@ public class MiningResultAdapter extends TypeAdapter<MiningResult> {
       urls.value(url);
     }
     urls.endArray();
+    urls.name("is_deleted").value(value.isDeleted());
     urls.name("name").value(value.getName());
     urls.name("comment").value(value.getComment());
     out.endObject();
@@ -63,6 +64,9 @@ public class MiningResultAdapter extends TypeAdapter<MiningResult> {
     in.endArray();
 
     in.nextName();
+    final boolean isDeleted = in.nextBoolean();
+
+    in.nextName();
     String name = null;
     if (in.peek() == JsonToken.NULL) {
       in.nextNull();
@@ -79,7 +83,7 @@ public class MiningResultAdapter extends TypeAdapter<MiningResult> {
     }
 
     in.endObject();
-    return new MiningResult(id, projectName, frequency, maxDepth, size, node, urls, name, comment);
+    return new MiningResult(id, projectName, frequency, maxDepth, size, node, urls, isDeleted, name, comment);
   }
 
 }

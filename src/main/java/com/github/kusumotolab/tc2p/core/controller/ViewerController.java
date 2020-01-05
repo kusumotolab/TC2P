@@ -32,7 +32,22 @@ public class ViewerController<V extends View, P extends IViewPresenter<V>> exten
   }
 
   @Override
+  public void delete() {
+    useCase.delete();
+  }
+
+  @Override
   public void command(final String command) {
+    if (command.equals("q")) {
+      useCase.finish();
+      return;
+    } else if (command.equals("delete")) {
+      delete();
+      return;
+    } else if (command.isEmpty()) {
+      next();
+      return;
+    }
     useCase.addComment(command);
   }
 }

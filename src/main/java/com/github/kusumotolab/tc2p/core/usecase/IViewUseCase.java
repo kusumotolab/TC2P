@@ -17,5 +17,9 @@ public abstract class IViewUseCase <V extends View, P extends Presenter<V>> exte
 
   public abstract void open();
 
+  public abstract void delete();
+
+  public abstract void finish();
+
   public abstract void addComment(final String comment);
 }

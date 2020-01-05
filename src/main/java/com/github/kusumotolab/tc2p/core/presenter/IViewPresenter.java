@@ -10,7 +10,9 @@ public abstract class IViewPresenter<V extends View> extends Presenter<V> {
     super(view);
   }
 
-  public abstract void show(final MiningResult result);
+  public abstract void show(final MiningResult result, final int index);
 
   public abstract void observeInput();
+
+  public abstract void finish();
 }

@@ -20,6 +20,7 @@ public class MiningResult {
   private final Node<ASTLabel> root;
   private final List<String> urls;
 
+  private boolean isDeleted = false;
   private String name;
   private String comment;
 }

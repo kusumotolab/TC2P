@@ -17,5 +17,7 @@ public abstract class IViewerController<V extends View, P extends IViewPresenter
 
   public abstract void openInstance();
 
+  public abstract void delete();
+
   public abstract void command(final String command);
 }

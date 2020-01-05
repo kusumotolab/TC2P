@@ -20,7 +20,9 @@ public class ViewPresenter extends IViewPresenter<InteractiveConsoleView> {
   }
 
   @Override
-  public void show(final MiningResult result) {
+  public void show(final MiningResult result, final int index) {
+    view.clear();
+    view.print("id = " + result.getId());
     view.print("project = " + result.getProjectName());
     view.print("frequency = " + result.getFrequency());
     view.print("max_depth = " + result.getMaxDepth());
@@ -35,12 +37,20 @@ public class ViewPresenter extends IViewPresenter<InteractiveConsoleView> {
           .append(")\n");
     }
     view.print(text.toString());
-    view.print("");
+    view.print("\nindex = " + index);
+    if (result.getComment() != null) {
+      view.print("comment = " + result.getComment());
+    }
   }
 
   @Override
   public void observeInput() {
     view.observeReader();
+  }
+
+  @Override
+  public void finish() {
+    view.close();
   }
 
   private String toString(final ASTLabel label) {
