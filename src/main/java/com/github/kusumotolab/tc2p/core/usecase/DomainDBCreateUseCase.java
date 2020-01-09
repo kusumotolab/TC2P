@@ -26,7 +26,7 @@ public class DomainDBCreateUseCase<V extends View,   P extends Presenter<V>> ext
       final EditScriptFetcher.Input editScriptFetcherInput = new EditScriptFetcher.Input(projectName);
       editScripts.addAll(new EditScriptFetcher().execute(editScriptFetcherInput));
     }
-    final SQLite sqLite = new SQLite("ignore/DB/" + input.getDomain() + ".sqlite3");
+    final SQLite sqLite = new SQLite("ignore/DB/" + input.getDomain().replaceAll(" ", "_") + ".sqlite3");
     sqLite.connect()
         .andThen(sqLite.createTable(EditScript.class))
         .andThen(sqLite.createTable(TreeNodeRawObject.class))
