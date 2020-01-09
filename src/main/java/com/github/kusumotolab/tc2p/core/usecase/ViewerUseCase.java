@@ -1,9 +1,12 @@
 package com.github.kusumotolab.tc2p.core.usecase;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.github.kusumotolab.sdl4j.util.CommandLine;
 import com.github.kusumotolab.tc2p.core.configuration.ViewerConfiguration;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
+import com.github.kusumotolab.tc2p.core.entities.Tag;
 import com.github.kusumotolab.tc2p.core.presenter.IViewPresenter;
 import com.github.kusumotolab.tc2p.framework.View;
 import com.github.kusumotolab.tc2p.tools.db.Query;
@@ -14,7 +17,9 @@ import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition.RelationalOperator;
 import com.github.kusumotolab.tc2p.utils.Try;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 
 public class ViewerUseCase<V extends View, P extends IViewPresenter<V>> extends IViewUseCase<V, P> {
 
@@ -28,11 +33,26 @@ public class ViewerUseCase<V extends View, P extends IViewPresenter<V>> extends 
 
   @Override
   public void execute(final ViewerConfiguration viewerConfiguration) {
+    final List<Tag> tags = viewerConfiguration.getTags();
     sqLite = new SQLite(viewerConfiguration.getInputFilePath().toString());
+    final Map<Tag, Integer> map = Maps.newHashMap();
+
     this.miningResults = sqLite.connect()
         .andThen(sqLite.fetch(createQuery(viewerConfiguration)))
+        .observeOn(Schedulers.single())
+        .doOnNext(result -> {
+          for (final Tag tag : result.getTags()) {
+            final Integer counter = map.getOrDefault(tag, 0);
+            map.put(tag, counter + 1);
+          }
+        })
+        .filter(result -> result.getTags().containsAll(tags))
         .toList()
         .blockingGet();
+
+    for (final Entry<Tag, Integer> entry : map.entrySet()) {
+      System.out.println(entry.getKey() + ": " + entry.getValue());
+    }
 
     if (miningResults.isEmpty()) {
       return;

@@ -2,7 +2,11 @@ package com.github.kusumotolab.tc2p.core.entities;
 
 import java.lang.reflect.Field;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Label;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteColumn;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
@@ -41,6 +45,9 @@ public class MiningResult extends SQLiteObject {
   @SQLiteColumn(type = Types.CHAR)
   private List<String> urls;
 
+  @SQLiteColumn(type = Types.CHAR)
+  private List<Tag> tags;
+
   @SQLiteColumn(type = Types.BOOLEAN, name = "is_deleted")
   private boolean isDeleted = false;
 
@@ -61,6 +68,34 @@ public class MiningResult extends SQLiteObject {
     this.size = size;
     this.root = root;
     this.urls = urls;
+    this.tags = convertToTags(root);
+  }
+
+  public MiningResult(final int id, final String projectName, final int frequency, final int maxDepth, final int size,
+      final Node<ASTLabel> node, final List<String> urls, final boolean isDeleted, final String name, final String comment) {
+    this.id = id;
+    this.projectName = projectName;
+    this.frequency = frequency;
+    this.maxDepth = maxDepth;
+    this.size = size;
+    this.root = node;
+    this.urls = urls;
+    this.tags = convertToTags(root);
+    this.isDeleted = isDeleted;
+    this.name = name;
+    this.comment = comment;
+
+  }
+
+  private List<Tag> convertToTags(final Node<ASTLabel> node) {
+    return node.getLabels().stream()
+        .map(Label::getLabel)
+        .map(ASTLabel::getType)
+        .map(Tag::create)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .distinct()
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -68,9 +103,13 @@ public class MiningResult extends SQLiteObject {
     if (field.getName().equals("root")) {
       return GSON.toJson(value);
     }
-
     if (field.getName().equals("urls")) {
       return String.join("===", urls);
+    }
+    if (field.getName().equals("tags")) {
+      return tags.stream()
+          .map(Enum::toString)
+          .collect(Collectors.joining(","));
     }
     return super.encodeField(value, field);
   }
@@ -82,6 +121,12 @@ public class MiningResult extends SQLiteObject {
     }
     if (field.getName().equals("urls")) {
       return Lists.newArrayList(((String) value).split("==="));
+    }
+    if (field.getName().equals("tags")) {
+      return Arrays.stream(((String) value).split(","))
+          .filter(e -> !e.isEmpty())
+          .map(Tag::valueOf)
+          .collect(Collectors.toList());
     }
     return super.decodeField(value, field);
   }

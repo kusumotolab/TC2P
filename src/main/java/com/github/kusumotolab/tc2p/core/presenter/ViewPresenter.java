@@ -6,6 +6,7 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Label;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
+import com.github.kusumotolab.tc2p.core.entities.Tag;
 import com.github.kusumotolab.tc2p.core.view.InteractiveConsoleView;
 import com.github.kusumotolab.tc2p.utils.Colors;
 import com.google.common.base.Strings;
@@ -28,6 +29,10 @@ public class ViewPresenter extends IViewPresenter<InteractiveConsoleView> {
     view.print("frequency = " + result.getFrequency());
     view.print("max_depth = " + result.getMaxDepth());
     view.print("max_size = " + result.getSize());
+    if (!result.getTags().isEmpty()) {
+      view.print("tags = " + result.getTags().stream().map(Tag::getName).collect(Collectors.joining(", ")));
+    }
+
     if (result.getComment() != null) {
       view.print("comment = " + result.getComment());
     }
