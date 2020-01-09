@@ -22,7 +22,7 @@ public class DomainDBCreateUseCase<V extends View,   P extends Presenter<V>> ext
   public void execute(final Input input) {
     final List<EditScript> editScripts = Lists.newArrayList();
     for (final String project : input.getProjects()) {
-      final String projectName = project.replace("/", "__").replace(" ", "-");
+      final String projectName = project.replace("/", "__");
       final EditScriptFetcher.Input editScriptFetcherInput = new EditScriptFetcher.Input(projectName);
       editScripts.addAll(new EditScriptFetcher().execute(editScriptFetcherInput));
     }
