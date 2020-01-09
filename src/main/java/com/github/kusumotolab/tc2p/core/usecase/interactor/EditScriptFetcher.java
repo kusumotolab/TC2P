@@ -27,7 +27,8 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
     final Map<String, TreeNodeRawObject> treeNodeRawMap = createTreeNodeMap(input, sqLite);
     final Query<EditScript> query = createQuery(input);
 
-    return sqLite.fetch(query)
+    return sqLite.connect()
+        .andThen(sqLite.fetch(query))
         .flatMap(e -> Observable.just(e).subscribeOn(Schedulers.computation()))
         .map(editScript -> {
           final String baseKey = createBaseKey(editScript);

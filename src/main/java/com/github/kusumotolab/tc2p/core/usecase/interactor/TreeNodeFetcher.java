@@ -22,6 +22,7 @@ public class TreeNodeFetcher implements Interactor<Input, List<TreeNodeRawObject
     final Query<TreeNodeRawObject> query = createQuery(input);
 
     return sqLite.connect()
+        .andThen(sqLite.createTable(TreeNodeRawObject.class))
         .andThen(sqLite.fetch(query))
         .toList()
         .blockingGet();
