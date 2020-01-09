@@ -5,10 +5,7 @@ import com.github.kusumotolab.tc2p.core.entities.TreeNodeRawObject;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.TreeNodeFetcher.Input;
 import com.github.kusumotolab.tc2p.tools.db.Query;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
-import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteCondition;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery;
-import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition;
-import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition.RelationalOperator;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +16,7 @@ public class TreeNodeFetcher implements Interactor<Input, List<TreeNodeRawObject
 
   @Override
   public List<TreeNodeRawObject> execute(final Input input) {
-    final Query<TreeNodeRawObject> query = createQuery(input);
+    final Query<TreeNodeRawObject> query = createQuery();
 
     return sqLite.connect()
         .andThen(sqLite.createTable(TreeNodeRawObject.class))
@@ -28,12 +25,10 @@ public class TreeNodeFetcher implements Interactor<Input, List<TreeNodeRawObject
         .blockingGet();
   }
 
-  private Query<TreeNodeRawObject> createQuery(final Input input) {
-    final SQLiteCondition condition = new SQLiteRelationalCondition("project_name", RelationalOperator.EQUAL, input.getProjectName());
+  private Query<TreeNodeRawObject> createQuery() {
 
     return SQLiteQuery.select(TreeNodeRawObject.class)
         .from(TreeNodeRawObject.class)
-        .where(condition)
         .build();
   }
 

@@ -9,10 +9,7 @@ import com.github.kusumotolab.tc2p.core.entities.TreeNodeRawObject;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.EditScriptFetcher.Input;
 import com.github.kusumotolab.tc2p.tools.db.Query;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
-import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteCondition;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery;
-import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition;
-import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteRelationalCondition.RelationalOperator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.reactivex.Observable;
@@ -25,7 +22,7 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
   public List<EditScript> execute(final Input input) {
     final SQLite sqLite = new SQLite("./ignore/DB/" + input.getProjectName() + ".sqlite3");
     final Map<String, TreeNodeRawObject> treeNodeRawMap = createTreeNodeMap(input, sqLite);
-    final Query<EditScript> query = createQuery(input);
+    final Query<EditScript> query = createQuery();
 
     return sqLite.createTable(EditScript.class)
         .andThen(sqLite.fetch(query))
@@ -68,11 +65,9 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
         + editScript.getDstName();
   }
 
-  private Query<EditScript> createQuery(final Input input) {
-    final SQLiteCondition condition = new SQLiteRelationalCondition("project_name", RelationalOperator.EQUAL, input.getProjectName());
+  private Query<EditScript> createQuery() {
     return SQLiteQuery.select(EditScript.class)
         .from(EditScript.class)
-        .where(condition)
         .build();
   }
 

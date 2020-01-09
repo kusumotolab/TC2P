@@ -16,6 +16,8 @@ import com.github.kusumotolab.tc2p.core.usecase.SaveTreeNodeRepositoryUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ViewerUseCase;
 import com.github.kusumotolab.tc2p.core.view.ConsoleView;
 import com.github.kusumotolab.tc2p.core.view.InteractiveConsoleView;
+import com.github.kusumotolab.tc2p.utils.MultipleParallelFreqt;
+import com.github.kusumotolab.tc2p.utils.ParallelFreqt;
 
 public class Services {
 
@@ -29,9 +31,17 @@ public class Services {
   @Service(name = "mining")
   private static final ServiceGraph<?, ?, ?, ?> mining = ServiceGraph.view(ConsoleView::new)
       .presenter(MiningEditPatternPresenter::new)
-      .useCase(MiningEditPatternUseCase::new)
+      .useCase(presenter -> new MiningEditPatternUseCase<>(presenter, new ParallelFreqt()))
       .controller(MiningEditPatternController::new)
       .resolve();
+
+  @Service(name = "mining-domain")
+  private static final ServiceGraph<?, ?, ?, ?> miningDomain = ServiceGraph.view(ConsoleView::new)
+      .presenter(MiningEditPatternPresenter::new)
+      .useCase(presenter -> new MiningEditPatternUseCase<>(presenter, new MultipleParallelFreqt()))
+      .controller(MiningEditPatternController::new)
+      .resolve();
+
 
   @Service(name = "view")
   private static final ServiceGraph<?, ?, ?, ?> view;

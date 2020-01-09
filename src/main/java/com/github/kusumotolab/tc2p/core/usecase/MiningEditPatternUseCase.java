@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Freqt;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.TreePattern;
 import com.github.kusumotolab.sdl4j.util.Measure;
@@ -23,8 +24,11 @@ import com.google.common.collect.Sets;
 public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatternPresenter<V>> extends
     IMiningPatternUseCase<V, P> {
 
-  public MiningEditPatternUseCase(final P presenter) {
+  private final Freqt<ASTLabel> freqt;
+
+  public MiningEditPatternUseCase(final P presenter, final Freqt<ASTLabel> freqt) {
     super(presenter);
+    this.freqt = freqt;
   }
 
   @Override
@@ -45,7 +49,6 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
     editScripts.clear();
 
     final double minimumSupport = calculateMinimumSupport(trees, input.getFrequency());
-    final ParallelFreqt freqt = new ParallelFreqt();
     final MeasuredResult<Set<TreePattern<ASTLabel>>> measuredResult = Measure.time(() -> freqt.mining(trees, minimumSupport));
     presenter.time("Freqt", measuredResult.getDuration());
 
