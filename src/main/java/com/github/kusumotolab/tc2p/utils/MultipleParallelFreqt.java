@@ -15,11 +15,19 @@ public class MultipleParallelFreqt extends ParallelFreqt {
   protected Set<TreePattern<ASTLabel>> extractF1(final Set<Node<ASTLabel>> trees, final int borderline,
       final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
     return super.extractF1(trees, borderline, countPatternCache).stream()
-        .filter(pattern -> {
-          final Set<String> projectBaseUrlSet = pattern.getTreeIds().stream()
-              .map(e -> e.split("/compare/")[0])
-              .collect(Collectors.toSet());
-          return projectBaseUrlSet.size() >= 2;
-        }).collect(Collectors.toSet());
+        .filter(this::isMultipleProjectsPattern)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  protected boolean filterPattern(final TreePattern<ASTLabel> pattern, final int borderline) {
+    return super.filterPattern(pattern, borderline) && isMultipleProjectsPattern(pattern);
+  }
+
+  private boolean isMultipleProjectsPattern(final TreePattern<ASTLabel> pattern) {
+    final Set<String> projectBaseUrlSet = pattern.getTreeIds().stream()
+        .map(e -> e.split("/compare/")[0])
+        .collect(Collectors.toSet());
+    return projectBaseUrlSet.size() >= 2;
   }
 }
