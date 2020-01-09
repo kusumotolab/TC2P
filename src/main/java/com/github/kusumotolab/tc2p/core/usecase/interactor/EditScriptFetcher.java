@@ -41,7 +41,7 @@ public class EditScriptFetcher implements Interactor<Input, List<EditScript>> {
           }
           editScript.setTreeNodes(treeNodes);
           return editScript;
-        }).toList().blockingGet();
+        }).toList().doOnSuccess(e -> sqLite.close().blockingAwait()).blockingGet();
   }
 
   private Map<String, TreeNodeRawObject> createTreeNodeMap(final Input input, final SQLite sqLite) {
