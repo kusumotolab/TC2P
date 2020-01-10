@@ -287,7 +287,11 @@ public class ParallelFreqt extends Freqt<ASTLabel> {
           rootIds.addAll(countResult.ids);
           return true;
         })
-        .reduce((e1, e2) -> new CountResult(e1.count + e2.count, Sets.union(e1.ids, e2.ids)))
+        .reduce((e1, e2) -> {
+          final Set<String> set = Sets.newHashSet(e1.ids);
+          set.addAll(e2.ids);
+          return new CountResult(e1.count + e2.count, set);
+        })
         .orElse(new CountResult(0, Collections.emptySet()));
   }
 
