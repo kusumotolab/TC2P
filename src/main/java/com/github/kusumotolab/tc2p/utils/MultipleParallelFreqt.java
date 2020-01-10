@@ -8,13 +8,14 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.TreePattern;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 public class MultipleParallelFreqt extends ParallelFreqt {
 
   @Override
   protected Set<TreePattern<ASTLabel>> extractF1(final Set<Node<ASTLabel>> trees, final int borderline,
       final Multimap<List<Label<ASTLabel>>, Node<ASTLabel>> countPatternCache) {
-    return super.extractF1(trees, borderline, countPatternCache).stream()
+    return super.extractF1(trees, borderline, countPatternCache).parallelStream()
         .filter(this::isMultipleProjectsPattern)
         .collect(Collectors.toSet());
   }
@@ -25,9 +26,11 @@ public class MultipleParallelFreqt extends ParallelFreqt {
   }
 
   private boolean isMultipleProjectsPattern(final TreePattern<ASTLabel> pattern) {
-    final Set<String> projectBaseUrlSet = pattern.getTreeIds().stream()
-        .map(e -> e.split("/compare/")[0])
-        .collect(Collectors.toSet());
+    final Set<String> projectBaseUrlSet = Sets.newHashSet();
+    for (final String treeId : pattern.getTreeIds()) {
+      final String baseURL = treeId.split("/compare")[0];
+      projectBaseUrlSet.add(baseURL);
+    }
     return projectBaseUrlSet.size() >= 2;
   }
 }
