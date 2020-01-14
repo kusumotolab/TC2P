@@ -1,6 +1,7 @@
 package com.github.kusumotolab.tc2p.core.controller;
 
 import com.github.kusumotolab.tc2p.core.configuration.ViewerConfiguration;
+import com.github.kusumotolab.tc2p.core.entities.MiningResult.UsefulState;
 import com.github.kusumotolab.tc2p.core.presenter.IViewPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.ViewerUseCase;
 import com.github.kusumotolab.tc2p.framework.View;
@@ -34,6 +35,11 @@ public class ViewerController<V extends View, P extends IViewPresenter<V>> exten
   @Override
   public void delete() {
     useCase.delete();
+  }
+
+  @Override
+  public void updateState(final UsefulState state) {
+    useCase.updateState(state);
   }
 
   @Override

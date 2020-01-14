@@ -42,7 +42,6 @@ public class Services {
       .controller(MiningEditPatternController::new)
       .resolve();
 
-
   @Service(name = "view")
   private static final ServiceGraph<?, ?, ?, ?> view;
 

@@ -47,6 +47,6 @@ public class ViewerConfiguration  {
   }
 
   public enum SortElement {
-    INDEX, SIZE, DEPTH, FREQUENCY
+    INDEX, NODE_SIZE, ACTION_SIZE, DEPTH, FREQUENCY
   }
 }

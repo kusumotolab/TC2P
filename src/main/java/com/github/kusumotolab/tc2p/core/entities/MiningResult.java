@@ -15,9 +15,11 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+@EqualsAndHashCode(callSuper = false)
 @Data
 @ToString
 @AllArgsConstructor
@@ -39,6 +41,9 @@ public class MiningResult extends SQLiteObject {
   @SQLiteColumn(type = Types.INTEGER)
   private int size;
 
+  @SQLiteColumn(type = Types.INTEGER, name = "action_size")
+  private int actionSize;
+
   @SQLiteColumn(type = Types.CHAR)
   private Node<ASTLabel> root;
 
@@ -57,6 +62,9 @@ public class MiningResult extends SQLiteObject {
   @SQLiteColumn(type = Types.CHAR)
   private String comment;
 
+  @SQLiteColumn(type = Types.CHAR, name = "useful_state")
+  private UsefulState usefulState = UsefulState.NONE;
+
   private static final Gson GSON = GsonFactory.create();
 
   public MiningResult(final int id, final String projectName, final int frequency, final int maxDepth, final int size,
@@ -67,24 +75,28 @@ public class MiningResult extends SQLiteObject {
     this.maxDepth = maxDepth;
     this.size = size;
     this.root = root;
+    this.actionSize = root.getLabels().stream()
+        .reduce(0, (result, label) -> result + label.getLabel().getActions().size(), Integer::sum);
     this.urls = urls;
     this.tags = convertToTags(root);
   }
 
   public MiningResult(final int id, final String projectName, final int frequency, final int maxDepth, final int size,
-      final Node<ASTLabel> node, final List<String> urls, final boolean isDeleted, final String name, final String comment) {
+      final Node<ASTLabel> node, final List<String> urls, final boolean isDeleted, final String name, final String comment, final UsefulState usefulState) {
     this.id = id;
     this.projectName = projectName;
     this.frequency = frequency;
     this.maxDepth = maxDepth;
     this.size = size;
+    this.actionSize =  root.getLabels().stream()
+        .reduce(0, (result, label) -> result + label.getLabel().getActions().size(), Integer::sum);
     this.root = node;
     this.urls = urls;
     this.tags = convertToTags(root);
     this.isDeleted = isDeleted;
     this.name = name;
     this.comment = comment;
-
+    this.usefulState = usefulState;
   }
 
   private List<Tag> convertToTags(final Node<ASTLabel> node) {
@@ -111,6 +123,9 @@ public class MiningResult extends SQLiteObject {
           .map(Enum::toString)
           .collect(Collectors.joining(","));
     }
+    if (field.getName().equals("usefulState")) {
+      return usefulState.toString();
+    }
     return super.encodeField(value, field);
   }
 
@@ -128,6 +143,13 @@ public class MiningResult extends SQLiteObject {
           .map(Tag::valueOf)
           .collect(Collectors.toList());
     }
+    if (field.getName().equals("usefulState")) {
+      return UsefulState.valueOf(value.toString());
+    }
     return super.decodeField(value, field);
+  }
+
+  public enum UsefulState {
+    USEFUL, NOT_USEFUL, NONE
   }
 }

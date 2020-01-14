@@ -5,6 +5,7 @@ import java.util.List;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
+import com.github.kusumotolab.tc2p.core.entities.MiningResult.UsefulState;
 import com.google.common.collect.Lists;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -82,8 +83,11 @@ public class MiningResultAdapter extends TypeAdapter<MiningResult> {
       comment = in.nextString();
     }
 
+    in.nextName();
+    final String state = in.nextString();
+
     in.endObject();
-    return new MiningResult(id, projectName, frequency, maxDepth, size, node, urls, isDeleted, name, comment);
+    return new MiningResult(id, projectName, frequency, maxDepth, size, node, urls, isDeleted, name, comment, UsefulState.valueOf(state));
   }
 
 }

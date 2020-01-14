@@ -6,6 +6,7 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Label;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
+import com.github.kusumotolab.tc2p.core.entities.MiningResult.UsefulState;
 import com.github.kusumotolab.tc2p.core.entities.Tag;
 import com.github.kusumotolab.tc2p.core.view.InteractiveConsoleView;
 import com.github.kusumotolab.tc2p.utils.Colors;
@@ -35,6 +36,9 @@ public class ViewPresenter extends IViewPresenter<InteractiveConsoleView> {
 
     if (result.getComment() != null) {
       view.print("comment = " + result.getComment());
+    }
+    if (!result.getUsefulState().equals(UsefulState.NONE)) {
+      view.print("state = " + result.getUsefulState().toString());
     }
 
     final StringBuilder text = new StringBuilder("\n");

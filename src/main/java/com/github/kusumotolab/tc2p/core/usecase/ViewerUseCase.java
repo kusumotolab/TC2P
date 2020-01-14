@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import com.github.kusumotolab.sdl4j.util.CommandLine;
 import com.github.kusumotolab.tc2p.core.configuration.ViewerConfiguration;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
+import com.github.kusumotolab.tc2p.core.entities.MiningResult.UsefulState;
 import com.github.kusumotolab.tc2p.core.entities.Tag;
 import com.github.kusumotolab.tc2p.core.presenter.IViewPresenter;
 import com.github.kusumotolab.tc2p.framework.View;
@@ -72,8 +73,11 @@ public class ViewerUseCase<V extends View, P extends IViewPresenter<V>> extends 
     }
 
     switch (configuration.getSort()) {
-      case SIZE:
+      case NODE_SIZE:
         queryBuilder = queryBuilder.orderBy("size", !configuration.isReverse());
+        break;
+      case ACTION_SIZE:
+        queryBuilder = queryBuilder.orderBy("action_size", !configuration.isReverse());
         break;
       case INDEX:
         queryBuilder = queryBuilder.orderBy("id", !configuration.isReverse());
@@ -142,6 +146,14 @@ public class ViewerUseCase<V extends View, P extends IViewPresenter<V>> extends 
   @Override
   public void finish() {
     sqLite.close().subscribe(presenter::finish);
+  }
+
+  @Override
+  public void updateState(final UsefulState state) {
+    final MiningResult miningResult = miningResults.get(index);
+    miningResult.setUsefulState(state);
+    sqLite.update(Observable.just(miningResult)).blockingAwait();
+    presenter.show(miningResult, index);
   }
 
   @Override
