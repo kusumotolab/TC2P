@@ -1,6 +1,7 @@
 package com.github.kusumotolab.tc2p.service;
 
 import com.github.kusumotolab.tc2p.core.controller.ConvertController;
+import com.github.kusumotolab.tc2p.core.controller.CountController;
 import com.github.kusumotolab.tc2p.core.controller.DomainDBCreatorController;
 import com.github.kusumotolab.tc2p.core.controller.MiningController;
 import com.github.kusumotolab.tc2p.core.controller.MiningEditPatternController;
@@ -10,6 +11,7 @@ import com.github.kusumotolab.tc2p.core.presenter.MiningRepositoryPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.ViewPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.ConvertToJsonUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ConvertToSQLiteUseCase;
+import com.github.kusumotolab.tc2p.core.usecase.CountUsefulUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.DomainDBCreateUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.MiningEditPatternUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.SaveTreeNodeRepositoryUseCase;
@@ -64,6 +66,13 @@ public class Services {
       .presenter(MiningEditPatternPresenter::new)
       .useCase(DomainDBCreateUseCase::new)
       .controller(DomainDBCreatorController::new)
+      .resolve();
+
+  @Service(name = "count")
+  private static final ServiceGraph<?, ?, ?, ?> count = ServiceGraph.view(ConsoleView::new)
+      .presenter(MiningEditPatternPresenter::new)
+      .useCase(CountUsefulUseCase::new)
+      .controller(CountController::new)
       .resolve();
 
   static {

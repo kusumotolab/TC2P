@@ -7,5 +7,9 @@ public abstract class Presenter<V extends View> {
   public Presenter(final V view) {
     this.view = view;
   }
+
+  public void show(final String text) {
+    view.print(text);
+  }
 }
 

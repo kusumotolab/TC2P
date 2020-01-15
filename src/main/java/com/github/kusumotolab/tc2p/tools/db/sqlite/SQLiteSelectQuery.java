@@ -36,6 +36,14 @@ public class SQLiteSelectQuery<T> implements Query<T> {
           .append(where.toString());
     }
 
+    if (!orders.isEmpty()) {
+      final List<String> orders = this.orders.stream()
+          .map(e -> e.getColumn() + " " + e.getOrder())
+          .collect(Collectors.toList());
+      stringBuilder.append(" ORDER BY ")
+          .append(String.join(", ", orders));
+    }
+
     if (limit != null) {
       stringBuilder.append(" LIMIT ")
           .append(limit);
@@ -54,14 +62,6 @@ public class SQLiteSelectQuery<T> implements Query<T> {
     if (having != null) {
       stringBuilder.append(" HAVING ")
           .append(having.toString());
-    }
-
-    if (!orders.isEmpty()) {
-      final List<String> orders = this.orders.stream()
-          .map(e -> e.getColumn() + " " + e.getOrder())
-          .collect(Collectors.toList());
-      stringBuilder.append(" ORDER BY ")
-          .append(String.join(", ", orders));
     }
 
     stringBuilder.append(";");

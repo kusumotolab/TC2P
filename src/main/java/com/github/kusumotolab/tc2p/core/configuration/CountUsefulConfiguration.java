@@ -10,7 +10,7 @@ import com.github.kusumotolab.tc2p.core.entities.Tag;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 
-public class ViewerConfiguration  {
+public class CountUsefulConfiguration {
 
   @Getter
   @Option(name = "-i", aliases = "--input", usage = "the results file (json)", required = true, handler = PathOptionHandler.class)
@@ -25,12 +25,8 @@ public class ViewerConfiguration  {
   private boolean reverse = false;
 
   @Getter
-  @Option(name = "-a", aliases = "--show-all", usage = "show all pattern")
-  private boolean showAll = false;
-
-  @Getter
-  @Option(name = "-c", aliases = "--show-commented", usage = "show only commented")
-  private boolean showOnlyCommented = false;
+  @Option(name = "-c", aliases = "--count", usage = "the number of patterns")
+  private int count = 50;
 
   @Getter
   private List<Tag> tags = Lists.newArrayList();
