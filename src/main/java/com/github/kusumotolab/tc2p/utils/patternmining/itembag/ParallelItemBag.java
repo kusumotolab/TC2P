@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import com.github.kusumotolab.tc2p.utils.Try;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -96,6 +97,10 @@ public class ParallelItemBag<Item> {
   }
 
   private void recursiveMining(final ITNode<Item> subtree, final int index, final List<ITNode<Item>> f1, final int minimumSupport) {
+    log.debug(subtree.getItemSet().stream()
+        .map(Object::toString)
+        .sorted()
+        .collect(Collectors.joining(", ")));
     final ITNode<Item> addNode = f1.get(index);
 
     final Set<TransactionID> newTransactionIds = Sets.intersection(subtree.getTransactionIds(), addNode.getTransactionIds());
