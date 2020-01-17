@@ -6,8 +6,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @RequiredArgsConstructor
+@ToString(of = {"actions", "type"})
 public class ASTLabel {
 
   @Getter private final int id;
