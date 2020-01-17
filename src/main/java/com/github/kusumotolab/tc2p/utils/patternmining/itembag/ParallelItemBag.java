@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import com.github.kusumotolab.tc2p.utils.Try;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -36,12 +37,13 @@ public class ParallelItemBag<Item> {
         futures.add(future);
       }
     }
-    futures.forEach(e -> Try.lambda(e::get));
+    futures.forEach(e -> Try.lambda(() -> e.get(10, TimeUnit.DAYS)));
     return root;
   }
 
   public void shutdown() {
-    service.shutdownNow();
+    service.shutdown();
+    Try.lambda(() -> service.awaitTermination(10, TimeUnit.DAYS));
   }
 
   private List<ITNode<Item>> extractF1(final ITNode<Item> root, final Set<Transaction<Item>> transactions, final int minimumSupport) {

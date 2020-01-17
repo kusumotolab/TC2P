@@ -2,6 +2,7 @@ package com.github.kusumotolab.tc2p.core.usecase;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.github.kusumotolab.sdl4j.util.Measure;
@@ -46,6 +47,7 @@ public class BaseUseCase<V extends View, P extends IMiningEditPatternPresenter<V
 
     final ParallelItemBag<ASTLabel> itemBag = new ParallelItemBag<>();
     final MeasuredResult<ITNode<ASTLabel>> measuredResult = Measure.time(() -> itemBag.mining(transactions, input.getFrequency()));
+    itemBag.shutdown();
     presenter.time("Freqt", measuredResult.getDuration());
 
     final ITNode<ASTLabel> rootNode = measuredResult.getValue();
@@ -70,8 +72,10 @@ public class BaseUseCase<V extends View, P extends IMiningEditPatternPresenter<V
           final Set<ItemAndOccurrence<ASTLabel>> items = Sets.newHashSet();
           final String nodeId = transactionId + "-" + node.getId();
           for (final ActionEnum action : node.getActions()) {
-            final ASTLabel label = new ASTLabel(node.getId(), node.getParentNode().getId(), Lists.newArrayList(action), node.getValue(),
-                node.getNewValue(), node.getType());
+            final int parentId = node.getParentNode() != null ? node.getParentNode().getId() : -1;
+            final ASTLabel label = new ASTLabel(node.getId(), parentId, Lists.newArrayList(action), node.getValue(), node.getNewValue(),
+                node.getType());
+            label.setComparator(new ASTLabelComparator());
             final Occurrence occurrence = new Occurrence(nodeId + "-" + action.toString());
             final ItemAndOccurrence<ASTLabel> itemAndOccurrence = new ItemAndOccurrence<>(label, occurrence);
             items.add(itemAndOccurrence);
@@ -99,5 +103,20 @@ public class BaseUseCase<V extends View, P extends IMiningEditPatternPresenter<V
 
   private String extractCommitIdFromFinerGitCommitMessage(final String commitMessage) {
     return commitMessage.substring(commitMessage.indexOf(':') + 1, commitMessage.indexOf('>'));
+  }
+
+
+  private static class ASTLabelComparator extends ASTLabel.Comparator {
+
+    @Override
+    public boolean isEqual(final ASTLabel l1, final ASTLabel l2) {
+      return l1.getActions().equals(l2.getActions())
+          && l1.getType().equals(l2.getType());
+    }
+
+    @Override
+    public int hash(final ASTLabel label) {
+      return Objects.hash(label.getActions(), label.getType());
+    }
   }
 }
