@@ -1,4 +1,4 @@
-package com.github.kusumotolab.tc2p.utils;
+package com.github.kusumotolab.tc2p.utils.patternmining;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +15,7 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.TreePattern;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
+import com.github.kusumotolab.tc2p.utils.Try;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;

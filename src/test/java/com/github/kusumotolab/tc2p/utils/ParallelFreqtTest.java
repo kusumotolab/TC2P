@@ -11,6 +11,7 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.TreePattern;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
 import com.github.kusumotolab.tc2p.core.entities.TreeNode;
+import com.github.kusumotolab.tc2p.utils.patternmining.ParallelFreqt;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

@@ -16,13 +16,11 @@ import com.github.kusumotolab.tc2p.core.presenter.IMiningEditPatternPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.EditScriptFetcher;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.PatternFilter;
 import com.github.kusumotolab.tc2p.framework.View;
-import com.github.kusumotolab.tc2p.utils.ParallelFreqt;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatternPresenter<V>> extends
-    IMiningPatternUseCase<V, P> {
+public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatternPresenter<V>> extends IMiningPatternUseCase<V, P> {
 
   private final Freqt<ASTLabel> freqt;
 

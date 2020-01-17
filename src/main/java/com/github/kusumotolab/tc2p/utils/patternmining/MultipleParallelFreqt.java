@@ -1,4 +1,4 @@
-package com.github.kusumotolab.tc2p.utils;
+package com.github.kusumotolab.tc2p.utils.patternmining;
 
 import java.util.List;
 import java.util.Set;

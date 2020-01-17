@@ -9,17 +9,19 @@ import com.github.kusumotolab.tc2p.core.controller.ViewerController;
 import com.github.kusumotolab.tc2p.core.presenter.MiningEditPatternPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.MiningRepositoryPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.ViewPresenter;
+import com.github.kusumotolab.tc2p.core.usecase.BaseUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ConvertToJsonUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ConvertToSQLiteUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.CountUsefulUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.DomainDBCreateUseCase;
+import com.github.kusumotolab.tc2p.core.usecase.IMiningPatternUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.MiningEditPatternUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.SaveTreeNodeRepositoryUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ViewerUseCase;
 import com.github.kusumotolab.tc2p.core.view.ConsoleView;
 import com.github.kusumotolab.tc2p.core.view.InteractiveConsoleView;
-import com.github.kusumotolab.tc2p.utils.MultipleParallelFreqt;
-import com.github.kusumotolab.tc2p.utils.ParallelFreqt;
+import com.github.kusumotolab.tc2p.utils.patternmining.MultipleParallelFreqt;
+import com.github.kusumotolab.tc2p.utils.patternmining.ParallelFreqt;
 
 public class Services {
 
@@ -73,6 +75,13 @@ public class Services {
       .presenter(MiningEditPatternPresenter::new)
       .useCase(CountUsefulUseCase::new)
       .controller(CountController::new)
+      .resolve();
+
+  @Service(name = "base")
+  private static final ServiceGraph<?, ?, ?, ?> base = ServiceGraph.view(ConsoleView::new)
+      .presenter(MiningEditPatternPresenter::new)
+      .useCase(BaseUseCase::new)
+      .controller(MiningEditPatternController::new)
       .resolve();
 
   static {
