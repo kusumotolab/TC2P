@@ -97,10 +97,7 @@ public class ParallelItemBag<Item> {
   }
 
   private void recursiveMining(final ITNode<Item> subtree, final int index, final List<ITNode<Item>> f1, final int minimumSupport) {
-    log.debug(subtree.getItemSet().stream()
-        .map(Object::toString)
-        .sorted()
-        .collect(Collectors.joining(", ")));
+    log.debug(String.valueOf(subtree.size()));
     final ITNode<Item> addNode = f1.get(index);
 
     final Set<TransactionID> newTransactionIds = Sets.intersection(subtree.getTransactionIds(), addNode.getTransactionIds());
