@@ -67,6 +67,7 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
         .andThen(sqLite.createTable(BaseResult.class))
         .andThen(sqLite.insert(observable))
         .andThen(sqLite.close())
+        .andThen(itemBag.shutdown())
         .blockingAwait();
   }
 

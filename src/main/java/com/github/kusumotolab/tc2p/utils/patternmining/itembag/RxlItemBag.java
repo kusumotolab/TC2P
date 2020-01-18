@@ -6,34 +6,50 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import com.github.kusumotolab.tc2p.utils.Try;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 
 public class RxlItemBag<Item> {
 
-  private Set<Set<Item>> biggestItems = Sets.newHashSet();
+  private final ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
 
   public Observable<ITNode<Item>> mining(final Set<Transaction<Item>> transactions, final int minimumSupport) {
     return Observable.create(emitter -> {
       final List<ITNode<Item>> f1 = extractF1(transactions, minimumSupport);
 
+      final List<Future<?>> futures = Lists.newArrayList();
       for (int i = 0; i < f1.size() - 1; i++) {
         final ITNode<Item> node = f1.get(i);
-        boolean hasChild = false;
         for (int j = i + 1; j < f1.size(); j++) {
-          hasChild = recursiveMining(emitter, node, j, f1, minimumSupport) || hasChild;
-        }
-        if (!hasChild && biggestItems.stream().noneMatch(e -> e.containsAll(node.getItemSet()))) {
-          emitter.onNext(node);
+          final int finalJ = j;
+          final Future<?> future = service.submit(() -> {
+            emitter.onNext(node);
+            recursiveMining(emitter, node, finalJ, f1, minimumSupport);
+          });
+          futures.add(future);
         }
       }
+      futures.forEach(e -> Try.lambda(() -> e.get(10, TimeUnit.DAYS)));
       emitter.onComplete();
+    });
+  }
+  public Completable shutdown() {
+    return Completable.create(emitter -> {
+      service.shutdown();
+      Try.lambda(() -> service.awaitTermination(10, TimeUnit.DAYS));
     });
   }
 
@@ -87,13 +103,13 @@ public class RxlItemBag<Item> {
 
   // それより下があれば true
   // それより下がなければ false
-  private boolean recursiveMining(final ObservableEmitter<ITNode<Item>> emitter, final ITNode<Item> subtree, final int index,
+  private void recursiveMining(final ObservableEmitter<ITNode<Item>> emitter, final ITNode<Item> subtree, final int index,
       final List<ITNode<Item>> f1, final int minimumSupport) {
     final ITNode<Item> addNode = f1.get(index);
 
     final Set<TransactionID> newTransactionIds = Sets.intersection(subtree.getTransactionIds(), addNode.getTransactionIds());
     if (newTransactionIds.size() < minimumSupport) {
-      return false;
+      return;
     }
 
     final Set<Item> itemSet = subtree.getItemSet();
@@ -108,22 +124,10 @@ public class RxlItemBag<Item> {
     newTransactionIDOccurrencesMap.putAll(addNode.getTransactionIDOccurrencesMap());
     final ITNode<Item> newNode = new ITNode<>(newItemSet, newTransactionIds, newTransactionIDOccurrencesMap);
 
-    boolean hasChild = false;
+    emitter.onNext(newNode);
     for (int i = index + 1; i < f1.size(); i++) {
-      hasChild = recursiveMining(emitter, newNode, i, f1, minimumSupport) || hasChild;
+      recursiveMining(emitter, newNode, i, f1, minimumSupport);
     }
-
-    if (hasChild) {
-      return true;
-    }
-
-    final boolean biggestItemContains = biggestItems.parallelStream()
-        .anyMatch(items -> items.containsAll(newNode.getItemSet()));
-    if (!biggestItemContains) {
-      emitter.onNext(newNode);
-      biggestItems.add(newNode.getItemSet());
-    }
-    return true;
 
   }
 }
