@@ -114,7 +114,7 @@ public class BaseUseCase<V extends View, P extends IMiningEditPatternPresenter<V
           final Set<ItemAndOccurrence<BaseLabel>> items = Sets.newHashSet();
           final String nodeId = transactionId + "-" + node.getId();
           for (final ActionEnum action : node.getActions()) {
-            final BaseLabel label = new BaseLabel(node.getId(), action, node.getType());
+            final BaseLabel label = new BaseLabel(node.getId(), action, node.getType(), node.getValue(), node.getNewValue());
             final Occurrence occurrence = new Occurrence(nodeId + "-" + action.toString());
             final ItemAndOccurrence<BaseLabel> itemAndOccurrence = new ItemAndOccurrence<>(label, occurrence);
             items.add(itemAndOccurrence);

@@ -24,7 +24,8 @@ import io.reactivex.ObservableEmitter;
 public class RxlItemBag<Item> {
 
   private final ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
+//
+//  private final ExecutorService service = Executors.newFixedThreadPool(1);
 
   public Observable<ITNode<Item>> mining(final Set<Transaction<Item>> transactions, final int minimumSupport) {
     return Observable.create(emitter -> {
@@ -33,10 +34,10 @@ public class RxlItemBag<Item> {
       final List<Future<?>> futures = Lists.newArrayList();
       for (int i = 0; i < f1.size() - 1; i++) {
         final ITNode<Item> node = f1.get(i);
+        emitter.onNext(node);
         for (int j = i + 1; j < f1.size(); j++) {
           final int finalJ = j;
           final Future<?> future = service.submit(() -> {
-            emitter.onNext(node);
             recursiveMining(emitter, node, finalJ, f1, minimumSupport);
           });
           futures.add(future);
@@ -46,6 +47,7 @@ public class RxlItemBag<Item> {
       emitter.onComplete();
     });
   }
+
   public Completable shutdown() {
     return Completable.create(emitter -> {
       service.shutdown();
@@ -102,8 +104,6 @@ public class RxlItemBag<Item> {
     return results;
   }
 
-  // それより下があれば true
-  // それより下がなければ false
   private void recursiveMining(final ObservableEmitter<ITNode<Item>> emitter, final ITNode<Item> subtree, final int index,
       final List<ITNode<Item>> f1, final int minimumSupport) {
     final ITNode<Item> addNode = f1.get(index);
