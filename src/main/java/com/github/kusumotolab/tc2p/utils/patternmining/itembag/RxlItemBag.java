@@ -50,6 +50,7 @@ public class RxlItemBag<Item> {
     return Completable.create(emitter -> {
       service.shutdown();
       Try.lambda(() -> service.awaitTermination(10, TimeUnit.DAYS));
+      emitter.onComplete();
     });
   }
 
