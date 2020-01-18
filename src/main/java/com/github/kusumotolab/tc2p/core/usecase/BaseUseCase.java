@@ -74,8 +74,8 @@ public class BaseUseCase<V extends View, P extends IMiningEditPatternPresenter<V
     final List<BaseResult> baseResults = nodes.stream()
         .map(node -> new BaseResult(input.getProjectName(), node))
         .collect(Collectors.toList());
-    FileUtil.createDirectoryIfNeed(Paths.get("./base_results"));
-    final SQLite sqLite = new SQLite("./base_results/" + input.getProjectName() + ".sqlite");
+    FileUtil.createDirectoryIfNeed(Paths.get("./ignore/base_results"));
+    final SQLite sqLite = new SQLite("./ignore/base_results/" + input.getProjectName() + ".sqlite");
 
     sqLite.connect()
         .andThen(sqLite.createTable(BaseResult.class))
