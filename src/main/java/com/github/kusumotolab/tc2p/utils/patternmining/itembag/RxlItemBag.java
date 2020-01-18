@@ -111,7 +111,7 @@ public class RxlItemBag<Item> {
       return;
     }
 
-    if (dt < newTransactionIds.size() * (subtree.getItemSet().size() + 1)) {
+    if (newTransactionIds.size() * (subtree.getItemSet().size() + 1) < dt) {
       return;
     }
 
