@@ -6,6 +6,8 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult.UsefulState;
+import com.github.kusumotolab.tc2p.core.entities.PatternPosition;
+import com.github.kusumotolab.tc2p.utils.patternmining.itembag.ParallelItemBag;
 import com.google.common.collect.Lists;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -24,8 +26,10 @@ public class MiningResultAdapter extends TypeAdapter<MiningResult> {
     out.name("size").value(value.getSize());
     new NodeAdapter().write(out.name("node"), value.getRoot());
     final JsonWriter urls = out.name("urls").beginArray();
-    for (final String url : value.getUrls()) {
-      urls.value(url);
+    for (final PatternPosition position : value.getPatternPositions()) {
+      out.beginObject();
+      out.name("url").value(position.getUrl());
+      out.name("mjava_diff").value(position.getMjavaDiff());
     }
     urls.endArray();
     urls.name("is_deleted").value(value.isDeleted());
@@ -56,11 +60,17 @@ public class MiningResultAdapter extends TypeAdapter<MiningResult> {
     final Node<ASTLabel> node = new NodeAdapter().read(in);
 
     in.nextName();
-    final List<String> urls = Lists.newArrayList();
+    final List<PatternPosition> patternPositions = Lists.newArrayList();
 
     in.beginArray();
     while (in.hasNext()) {
-      urls.add(in.nextString());
+      in.beginObject();
+      in.nextName();
+      final String url = in.nextString();
+      in.nextName();
+      final String mjavadiff = in.nextString();
+      patternPositions.add(new PatternPosition(url, mjavadiff));
+      in.endObject();
     }
     in.endArray();
 
@@ -87,7 +97,7 @@ public class MiningResultAdapter extends TypeAdapter<MiningResult> {
     final String state = in.nextString();
 
     in.endObject();
-    return new MiningResult(id, projectName, frequency, maxDepth, size, node, urls, isDeleted, name, comment, UsefulState.valueOf(state));
+    return new MiningResult(id, projectName, frequency, maxDepth, size, node, patternPositions, isDeleted, name, comment, UsefulState.valueOf(state));
   }
 
 }

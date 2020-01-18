@@ -27,4 +27,7 @@ public class ITNode<T> {
         .reduce(1, Integer::sum);
   }
 
+  public int maximumFrequency() {
+    return transactionIds.size();
+  }
 }

@@ -1,6 +1,7 @@
 package com.github.kusumotolab.tc2p.core.entities;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
@@ -11,8 +12,8 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteColumn;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import com.github.kusumotolab.tc2p.tools.gson.GsonFactory;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,8 +48,8 @@ public class MiningResult extends SQLiteObject {
   @SQLiteColumn(type = Types.CHAR)
   private Node<ASTLabel> root;
 
-  @SQLiteColumn(type = Types.CHAR)
-  private List<String> urls;
+  @SQLiteColumn(type = Types.CHAR, name = "positions")
+  private List<PatternPosition> patternPositions;
 
   @SQLiteColumn(type = Types.CHAR)
   private List<Tag> tags;
@@ -68,7 +69,7 @@ public class MiningResult extends SQLiteObject {
   private static final Gson GSON = GsonFactory.create();
 
   public MiningResult(final int id, final String projectName, final int frequency, final int maxDepth, final int size,
-      final Node<ASTLabel> root, final List<String> urls) {
+      final Node<ASTLabel> root, final List<PatternPosition> patternPositions) {
     this.id = id;
     this.projectName = projectName;
     this.frequency = frequency;
@@ -77,21 +78,22 @@ public class MiningResult extends SQLiteObject {
     this.root = root;
     this.actionSize = root.getLabels().stream()
         .reduce(0, (result, label) -> result + label.getLabel().getActions().size(), Integer::sum);
-    this.urls = urls;
+    this.patternPositions = patternPositions;
     this.tags = convertToTags(root);
   }
 
   public MiningResult(final int id, final String projectName, final int frequency, final int maxDepth, final int size,
-      final Node<ASTLabel> node, final List<String> urls, final boolean isDeleted, final String name, final String comment, final UsefulState usefulState) {
+      final Node<ASTLabel> node, final List<PatternPosition> patternPositions, final boolean isDeleted, final String name,
+      final String comment, final UsefulState usefulState) {
     this.id = id;
     this.projectName = projectName;
     this.frequency = frequency;
     this.maxDepth = maxDepth;
     this.size = size;
-    this.actionSize =  root.getLabels().stream()
+    this.actionSize = root.getLabels().stream()
         .reduce(0, (result, label) -> result + label.getLabel().getActions().size(), Integer::sum);
     this.root = node;
-    this.urls = urls;
+    this.patternPositions = patternPositions;
     this.tags = convertToTags(root);
     this.isDeleted = isDeleted;
     this.name = name;
@@ -115,8 +117,8 @@ public class MiningResult extends SQLiteObject {
     if (field.getName().equals("root")) {
       return GSON.toJson(value);
     }
-    if (field.getName().equals("urls")) {
-      return String.join("===", urls);
+    if (field.getName().equals("patternPositions")) {
+      return GSON.toJson(value);
     }
     if (field.getName().equals("tags")) {
       return tags.stream()
@@ -134,8 +136,10 @@ public class MiningResult extends SQLiteObject {
     if (field.getName().equals("root")) {
       return GSON.fromJson(((String) value), Node.class);
     }
-    if (field.getName().equals("urls")) {
-      return Lists.newArrayList(((String) value).split("==="));
+    if (field.getName().equals("patternPositions")) {
+      Type listType = new TypeToken<List<PatternPosition>>() {
+      }.getType();
+      return GSON.fromJson(((String) value), listType);
     }
     if (field.getName().equals("tags")) {
       return Arrays.stream(((String) value).split(","))

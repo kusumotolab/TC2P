@@ -3,10 +3,12 @@ package com.github.kusumotolab.tc2p.core.usecase;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import com.github.kusumotolab.sdl4j.util.CommandLine;
 import com.github.kusumotolab.tc2p.core.configuration.ViewerConfiguration;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult.UsefulState;
+import com.github.kusumotolab.tc2p.core.entities.PatternPosition;
 import com.github.kusumotolab.tc2p.core.entities.Tag;
 import com.github.kusumotolab.tc2p.core.presenter.IViewPresenter;
 import com.github.kusumotolab.tc2p.framework.View;
@@ -119,7 +121,9 @@ public class ViewerUseCase<V extends View, P extends IViewPresenter<V>> extends 
 
   @Override
   public void open() {
-    final List<String> urls = miningResults.get(index).getUrls();
+    final List<String> urls = miningResults.get(index).getPatternPositions().stream()
+        .map(PatternPosition::getUrl)
+        .collect(Collectors.toList());
     urls.stream()
         .distinct()
         .forEach(url -> {

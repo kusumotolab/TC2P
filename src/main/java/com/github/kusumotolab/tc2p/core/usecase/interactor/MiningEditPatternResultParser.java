@@ -7,6 +7,7 @@ import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
+import com.github.kusumotolab.tc2p.core.entities.PatternPosition;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.MiningEditPatternResultParser.Input;
 import com.github.kusumotolab.tc2p.utils.Colors;
 import com.google.common.collect.Lists;
@@ -22,7 +23,7 @@ public class MiningEditPatternResultParser implements Interactor<Input, List<Min
     String projectName = "NoName";
     int frequency = 0;
     int maxDepth = 0;
-    List<String> urls = Lists.newArrayList();
+    List<PatternPosition> patternPositions = Lists.newArrayList();
     List<Label<ASTLabel>> astLabels = Lists.newArrayList();
     int nodeId = 0;
     int patternId = 0;
@@ -39,7 +40,7 @@ public class MiningEditPatternResultParser implements Interactor<Input, List<Min
       if (line.contains("ConsoleView - Frequency:")) {
         final String[] split = line.split(" ");
         frequency = Integer.parseInt(split[split.length - 1]);
-        urls = Lists.newArrayList();
+        patternPositions = Lists.newArrayList();
         astLabels = Lists.newArrayList();
         continue;
       }
@@ -94,7 +95,7 @@ public class MiningEditPatternResultParser implements Interactor<Input, List<Min
       }
 
       if (line.contains("https://github.com")) {
-        urls.add(line.split(" ")[1]);
+        patternPositions.add(PatternPosition.parse(line));
         continue;
       }
 
@@ -103,14 +104,14 @@ public class MiningEditPatternResultParser implements Interactor<Input, List<Min
           continue;
         }
         final MiningResult miningResult = new MiningResult(patternId, projectName, frequency, maxDepth, nodeId, Node.createTree(projectName, astLabels),
-            urls);
+            patternPositions);
         results.add(miningResult);
         patternId += 1;
         frequency = 0;
         maxDepth = 0;
         nodeId = 0;
         astLabels = Lists.newArrayList();
-        urls = Lists.newArrayList();
+        patternPositions = Lists.newArrayList();
       }
 
     }
