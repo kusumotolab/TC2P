@@ -45,11 +45,10 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
         .filter(e -> !e.getTreeNodeIds().isEmpty())
         .map(this::convertToTransaction)
         .collect(Collectors.toSet());
-//    presenter.endConstructingTrees(trees);
     editScripts.clear();
 
     final RxlItemBag<BaseLabel> itemBag = new RxlItemBag<>();
-    final Observable<BaseResult> observable = itemBag.mining(transactions, input.getFrequency(), 100)
+    final Observable<BaseResult> observable = itemBag.mining(transactions, input.getFrequency(), 300)
         .doOnNext(node -> {
           synchronized (this) {
             log.info("Frequency = " + node.maximumFrequency());

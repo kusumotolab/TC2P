@@ -1,6 +1,5 @@
 package com.github.kusumotolab.tc2p.utils.patternmining.itembag;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,18 +68,6 @@ public class RxlItemBag<Item> {
         itemToOccurrenceMap.put(itemAndOccurrence.getItem(), occurrences);
         itemAndTransactionIdToOccurrenceIdMap.put(transaction.getId(), itemToOccurrenceMap);
       }
-    }
-
-    final Set<Item> removedKeys = Sets.newHashSet();
-    itemTransactionIdMap.keySet().parallelStream()
-        .forEach(key -> {
-          final Collection<TransactionID> transactionIds = itemTransactionIdMap.get(key);
-          if (transactionIds.size() < dt) {
-            removedKeys.add(key);
-          }
-        });
-    for (final Item key : removedKeys) {
-//      itemTransactionIdMap.removeAll(key);
     }
 
     final List<ITNode<Item>> results = Lists.newArrayList();
