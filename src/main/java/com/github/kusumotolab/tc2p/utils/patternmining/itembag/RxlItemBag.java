@@ -80,13 +80,16 @@ public class RxlItemBag<Item> {
           }
         });
     for (final Item key : removedKeys) {
-      itemTransactionIdMap.removeAll(key);
+//      itemTransactionIdMap.removeAll(key);
     }
 
     final List<ITNode<Item>> results = Lists.newArrayList();
 
     for (final Item key : itemTransactionIdMap.keySet()) {
       final Set<TransactionID> transactionIds = Sets.newHashSet(itemTransactionIdMap.get(key));
+      if (transactionIds.size() < dt) {
+        continue;
+      }
       final Map<TransactionID, Map<Item, Occurrences>> transactionIdItemToOccurrenceMap = Maps.newHashMap();
       for (final TransactionID transactionId : transactionIds) {
         final Map<Item, Occurrences> itemOccurrencesMap = itemAndTransactionIdToOccurrenceIdMap.get(transactionId);
