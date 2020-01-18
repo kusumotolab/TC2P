@@ -18,7 +18,7 @@ import lombok.Data;
 @Data
 public class BaseResult extends SQLiteObject {
 
-  @SQLiteColumn(type = Types.INTEGER, primaryKey = true)
+  @SQLiteColumn(type = Types.INTEGER, primaryKey = true, autoIncrement = true)
   private int id;
 
   @SQLiteColumn(type = Types.CHAR, name = "project_name")
