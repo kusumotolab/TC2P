@@ -9,8 +9,8 @@ public class PatternPosition {
   private final String mjavaDiff;
 
   public static PatternPosition parse(final String line) {
-    final String url = line.split(" ")[1];
-    final String mjavaDiff = line.split("//")[1];
+    final String url = line.split(" ")[0];
+    final String mjavaDiff = line.split("//")[2];
     return new PatternPosition(url, mjavaDiff);
   }
 }

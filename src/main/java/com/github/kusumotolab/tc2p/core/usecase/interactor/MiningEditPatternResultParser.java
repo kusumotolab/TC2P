@@ -95,7 +95,7 @@ public class MiningEditPatternResultParser implements Interactor<Input, List<Min
       }
 
       if (line.contains("https://github.com")) {
-        patternPositions.add(PatternPosition.parse(line));
+        patternPositions.add(PatternPosition.parse(line.split(" ")[1]));
         continue;
       }
 
