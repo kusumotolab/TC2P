@@ -27,9 +27,9 @@ public class RxlItemBag<Item> {
 //
 //  private final ExecutorService service = Executors.newFixedThreadPool(1);
 
-  public Observable<ITNode<Item>> mining(final Set<Transaction<Item>> transactions, final int minimumSupport) {
+  public Observable<ITNode<Item>> mining(final Set<Transaction<Item>> transactions, final int minimumSupport, final int dt) {
     return Observable.create(emitter -> {
-      final List<ITNode<Item>> f1 = extractF1(transactions, minimumSupport);
+      final List<ITNode<Item>> f1 = extractF1(transactions, dt);
 
       final List<Future<?>> futures = Lists.newArrayList();
       for (int i = 0; i < f1.size() - 1; i++) {
@@ -37,9 +37,7 @@ public class RxlItemBag<Item> {
         emitter.onNext(node);
         for (int j = i + 1; j < f1.size(); j++) {
           final int finalJ = j;
-          final Future<?> future = service.submit(() -> {
-            recursiveMining(emitter, node, finalJ, f1, minimumSupport);
-          });
+          final Future<?> future = service.submit(() -> recursiveMining(emitter, node, finalJ, f1, minimumSupport, dt));
           futures.add(future);
         }
       }
@@ -56,7 +54,7 @@ public class RxlItemBag<Item> {
     });
   }
 
-  private List<ITNode<Item>> extractF1(final Set<Transaction<Item>> transactions, final int minimumSupport) {
+  private List<ITNode<Item>> extractF1(final Set<Transaction<Item>> transactions, final int dt) {
     final Multimap<Item, TransactionID> itemTransactionIdMap = HashMultimap.create();
     final Map<TransactionID, Map<Item, Occurrences>> itemAndTransactionIdToOccurrenceIdMap = new HashMap<>();
 
@@ -77,7 +75,7 @@ public class RxlItemBag<Item> {
     itemTransactionIdMap.keySet().parallelStream()
         .forEach(key -> {
           final Collection<TransactionID> transactionIds = itemTransactionIdMap.get(key);
-          if (transactionIds.size() < minimumSupport) {
+          if (transactionIds.size() < dt) {
             removedKeys.add(key);
           }
         });
@@ -105,11 +103,15 @@ public class RxlItemBag<Item> {
   }
 
   private void recursiveMining(final ObservableEmitter<ITNode<Item>> emitter, final ITNode<Item> subtree, final int index,
-      final List<ITNode<Item>> f1, final int minimumSupport) {
+      final List<ITNode<Item>> f1, final int minimumSupport, final int dt) {
     final ITNode<Item> addNode = f1.get(index);
 
     final Set<TransactionID> newTransactionIds = Sets.intersection(subtree.getTransactionIds(), addNode.getTransactionIds());
     if (newTransactionIds.size() < minimumSupport) {
+      return;
+    }
+
+    if (dt < newTransactionIds.size() * (subtree.getItemSet().size() + 1)) {
       return;
     }
 
@@ -127,7 +129,7 @@ public class RxlItemBag<Item> {
 
     emitter.onNext(newNode);
     for (int i = index + 1; i < f1.size(); i++) {
-      recursiveMining(emitter, newNode, i, f1, minimumSupport);
+      recursiveMining(emitter, newNode, i, f1, minimumSupport, dt);
     }
 
   }

@@ -49,7 +49,7 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
     editScripts.clear();
 
     final RxlItemBag<BaseLabel> itemBag = new RxlItemBag<>();
-    final Observable<BaseResult> observable = itemBag.mining(transactions, input.getFrequency())
+    final Observable<BaseResult> observable = itemBag.mining(transactions, input.getFrequency(), 300)
         .doOnNext(node -> {
           synchronized (this) {
             log.info("Frequency = " + node.maximumFrequency());
