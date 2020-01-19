@@ -129,11 +129,7 @@ public class RxlItemBag<Item> {
   }
 
   public enum Threshold {
-
-    LARGE(Threshold.l, 10), NORMAL(Threshold.n, 10), SMALL(10, 10), IGNORE(Integer.MAX_VALUE, Integer.MAX_VALUE);
-
-    private static int l = 500;
-    private static int n = 50;
+    LARGE(500, 10), NORMAL(100, 10), SMALL(10, 10), IGNORE(Integer.MAX_VALUE, Integer.MAX_VALUE);
 
     final int dt;
     final int aft;
@@ -148,11 +144,11 @@ public class RxlItemBag<Item> {
     }
 
     public static Threshold classify(final int size) {
-      if (10 <= size && size < Threshold.n) {
+      if (10 <= size && size < NORMAL.dt) {
         return SMALL;
-      } else if (Threshold.n <= size && size < Threshold.l) {
+      } else if (NORMAL.dt <= size && size < LARGE.dt) {
         return NORMAL;
-      } else if (Threshold.l <= size) {
+      } else if (LARGE.dt <= size) {
         return LARGE;
       }
       return IGNORE;
