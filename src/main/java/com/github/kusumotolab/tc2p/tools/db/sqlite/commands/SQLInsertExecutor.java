@@ -24,20 +24,18 @@ public class SQLInsertExecutor extends SQLCommandExecutor {
             return;
           }
 
-          synchronized (this) {
-            log.debug("Insert " + list.size() + " Objects.");
-            final Connection connection = sqLite.getConnection();
-            connection.setAutoCommit(false);
-            final SQLiteObject sampleObject = list.get(0);
-            final String prepareStatementCommand = sampleObject.prepareStatementCommand();
-            final PreparedStatement prepareStatement = connection.prepareStatement(prepareStatementCommand);
+          log.debug("Insert " + list.size() + " Objects.");
+          final Connection connection = sqLite.getConnection();
+          connection.setAutoCommit(false);
+          final SQLiteObject sampleObject = list.get(0);
+          final String prepareStatementCommand = sampleObject.prepareStatementCommand();
+          final PreparedStatement prepareStatement = connection.prepareStatement(prepareStatementCommand);
 
-            for (final SQLiteObject object : list) {
-              object.addBatchCommand(prepareStatement);
-            }
-            prepareStatement.executeBatch();
-            connection.commit();
+          for (final SQLiteObject object : list) {
+            object.addBatchCommand(prepareStatement);
           }
+          prepareStatement.executeBatch();
+          connection.commit();
         })).subscribeOn(Schedulers.single());
   }
 }
