@@ -18,7 +18,7 @@ public class SQLInsertExecutor extends SQLCommandExecutor {
 
   public <Model extends SQLiteObject> Completable execute(final Observable<Model> observer, final int bufferSize) {
     return Completable.create(emitter -> observer
-        .subscribeOn(Schedulers.io()).buffer(bufferSize)
+        .subscribeOn(Schedulers.single()).buffer(bufferSize)
         .doOnNext(list -> {
           if (list.isEmpty()) {
             return;
