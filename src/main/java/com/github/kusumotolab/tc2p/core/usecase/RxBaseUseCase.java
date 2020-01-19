@@ -73,14 +73,14 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
 
   private String toString(final BaseLabel label) {
     String text = "{action = " + label.getAction().toStringWithColor() + ", type = " + Colors.purple("\"" + label.getType() + "\"");
-    final String value = label.getValue();
-    if (value != null && !value.isEmpty()) {
-      text += ", value = " + Colors.purple("\"" + value + "\"");
-    }
-    final String newValue = label.getNewValue();
-    if (newValue != null && !newValue.isEmpty()) {
-      text += ", newValue = " + Colors.purple("\"" + newValue + "\"");
-    }
+//    final String value = label.getValue();
+//    if (value != null && !value.isEmpty()) {
+//      text += ", value = " + Colors.purple("\"" + value + "\"");
+//    }
+//    final String newValue = label.getNewValue();
+//    if (newValue != null && !newValue.isEmpty()) {
+//      text += ", newValue = " + Colors.purple("\"" + newValue + "\"");
+//    }
     return text + "}";
   }
 
@@ -139,6 +139,7 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
           }
           return items;
         }).flatMap(Collection::stream)
+        .filter(e -> filter(e.getItem()))
         .collect(Collectors.toList());
 
     return new Transaction<>(new TransactionID(transactionId), itemAndOccurrenceList);
@@ -160,5 +161,17 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
 
   private String extractCommitIdFromFinerGitCommitMessage(final String commitMessage) {
     return commitMessage.substring(commitMessage.indexOf(':') + 1, commitMessage.indexOf('>'));
+  }
+
+  private final Set<BaseLabel> filterdLabels = Sets.newHashSet(
+      new BaseLabel(0, ActionEnum.DEL, "MethodInvocation", "", ""),
+      new BaseLabel(0, ActionEnum.INS, "MethodInvocation", "", ""),
+      new BaseLabel(0, ActionEnum.UPD, "SimpleName", "", ""),
+      new BaseLabel(0, ActionEnum.DEL, "SimpleName", "", ""),
+      new BaseLabel(0, ActionEnum.INS, "SimpleName", "", "")
+      );
+
+  private boolean filter(final BaseLabel label) {
+    return !filterdLabels.contains(label);
   }
 }

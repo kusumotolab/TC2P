@@ -74,7 +74,9 @@ public class RxlItemBag<Item> {
 
     for (final Item key : itemTransactionIdMap.keySet()) {
       final Set<TransactionID> transactionIds = Sets.newHashSet(itemTransactionIdMap.get(key));
-      if (transactionIds.size() < dt) {
+      final int size = transactionIds.size();
+      final Threshold threshold = Threshold.classify(size);
+      if (size < threshold.aft || size < threshold.dt) {
         continue;
       }
       final Map<TransactionID, Map<Item, Occurrences>> transactionIdItemToOccurrenceMap = Maps.newHashMap();
@@ -97,11 +99,14 @@ public class RxlItemBag<Item> {
     final ITNode<Item> addNode = f1.get(index);
 
     final Set<TransactionID> newTransactionIds = Sets.intersection(subtree.getTransactionIds(), addNode.getTransactionIds());
-    if (newTransactionIds.size() < minimumSupport) {
+
+    final Threshold threshold = Threshold.classify(addNode);
+
+    if (newTransactionIds.size() < threshold.aft) {
       return;
     }
 
-    if (newTransactionIds.size() * (subtree.getItemSet().size() + 1) < dt) {
+    if (newTransactionIds.size() * (subtree.getItemSet().size() + 1) < threshold.dt) {
       return;
     }
 
@@ -121,6 +126,32 @@ public class RxlItemBag<Item> {
     for (int i = index + 1; i < f1.size(); i++) {
       recursiveMining(emitter, newNode, i, f1, minimumSupport, dt);
     }
+  }
 
+  public enum Threshold {
+    LARGE(500, 10), NORMAL(100, 10), SMALL(10, 10), IGNORE(Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+    final int dt;
+    final int aft;
+
+    Threshold(final int dt, final int aft) {
+      this.dt = dt;
+      this.aft = aft;
+    }
+
+    public static <T> Threshold classify(final ITNode<T> node) {
+      return classify(node.getTransactionIds().size());
+    }
+
+    public static Threshold classify(final int size) {
+      if (10 <= size && size < 100) {
+        return SMALL;
+      } else if (100 <= size && size < 500) {
+        return NORMAL;
+      } else if (500 <= size) {
+        return LARGE;
+      }
+      return IGNORE;
+    }
   }
 }

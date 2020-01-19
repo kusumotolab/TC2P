@@ -30,6 +30,9 @@ public class BaseResult extends SQLiteObject {
   @SQLiteColumn(type = Types.CHAR)
   private Set<BaseLabel> actions;
 
+  @SQLiteColumn(type = Types.INTEGER, name = "action_size")
+  private int actionSize;
+
   @SQLiteColumn(type = Types.CHAR, name = "positions")
   private List<PatternPosition> patternPositions;
 
@@ -40,6 +43,7 @@ public class BaseResult extends SQLiteObject {
     this.projectName = projectName;
     this.frequency = node.maximumFrequency();
     this.actions = node.getItemSet();
+    this.actionSize = actions.size();
     this.patternPositions = node.getTransactionIds().stream()
         .map(TransactionID::getValue)
         .map(PatternPosition::parse)
