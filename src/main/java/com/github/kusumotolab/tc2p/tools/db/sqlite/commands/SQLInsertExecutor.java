@@ -8,6 +8,7 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -24,18 +25,20 @@ public class SQLInsertExecutor extends SQLCommandExecutor {
             return;
           }
 
-          log.debug("Insert " + list.size() + " Objects.");
-          final Connection connection = sqLite.getConnection();
-          connection.setAutoCommit(false);
-          final SQLiteObject sampleObject = list.get(0);
-          final String prepareStatementCommand = sampleObject.prepareStatementCommand();
-          final PreparedStatement prepareStatement = connection.prepareStatement(prepareStatementCommand);
+          synchronized (this) {
+            log.debug("Insert " + list.size() + " Objects.");
+            final Connection connection = sqLite.getConnection();
+            connection.setAutoCommit(false);
+            final SQLiteObject sampleObject = list.get(0);
+            final String prepareStatementCommand = sampleObject.prepareStatementCommand();
+            final PreparedStatement prepareStatement = connection.prepareStatement(prepareStatementCommand);
 
-          for (final SQLiteObject object : list) {
-            object.addBatchCommand(prepareStatement);
+            for (final SQLiteObject object : list) {
+              object.addBatchCommand(prepareStatement);
+            }
+            prepareStatement.executeBatch();
+            connection.commit();
           }
-          prepareStatement.executeBatch();
-          connection.commit();
         })
         .subscribeOn(Schedulers.single())
         .subscribe(e -> {}, e -> {}, emitter::onComplete));
