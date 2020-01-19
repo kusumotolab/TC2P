@@ -50,7 +50,7 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
 
     final RxlItemBag<BaseLabel> itemBag = new RxlItemBag<>();
     final Observable<BaseResult> observable = itemBag.mining(transactions, input.getFrequency(), 300)
-        .observeOn(Schedulers.single())
+        .subscribeOn(Schedulers.single())
         .doOnNext(node -> {
           log.info("Frequency = " + node.maximumFrequency());
           node.getItemSet().stream()
