@@ -24,6 +24,7 @@ import com.github.kusumotolab.tc2p.utils.patternmining.itembag.TransactionID;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -49,14 +50,13 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
 
     final RxlItemBag<BaseLabel> itemBag = new RxlItemBag<>();
     final Observable<BaseResult> observable = itemBag.mining(transactions, input.getFrequency(), 300)
+        .observeOn(Schedulers.single())
         .doOnNext(node -> {
-          synchronized (this) {
-            log.info("Frequency = " + node.maximumFrequency());
-            node.getItemSet().stream()
-                .map(this::toString)
-                .forEach(log::info);
-            System.out.println();
-          }
+          log.info("Frequency = " + node.maximumFrequency());
+          node.getItemSet().stream()
+              .map(this::toString)
+              .forEach(log::info);
+          System.out.println();
         }).map(e -> new BaseResult(input.getProjectName(), e));
 
     FileUtil.createDirectoryIfNeed(Paths.get("./ignore/base_results"));
@@ -166,8 +166,6 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
   private final Set<BaseLabel> filterdLabels = Sets.newHashSet(
       new BaseLabel(0, ActionEnum.DEL, "Block", "", ""),
       new BaseLabel(0, ActionEnum.INS, "Block", "", ""),
-      new BaseLabel(0, ActionEnum.DEL, "Block", "", ""),
-      new BaseLabel(0, ActionEnum.INS, "Block", "", ""),
       new BaseLabel(0, ActionEnum.DEL, "VariableDeclarationStatement", "", ""),
       new BaseLabel(0, ActionEnum.INS, "VariableDeclarationStatement", "", ""),
       new BaseLabel(0, ActionEnum.DEL, "ExpressionStatement", "", ""),
@@ -177,7 +175,7 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
       new BaseLabel(0, ActionEnum.UPD, "SimpleName", "", ""),
       new BaseLabel(0, ActionEnum.DEL, "SimpleName", "", ""),
       new BaseLabel(0, ActionEnum.INS, "SimpleName", "", "")
-      );
+  );
 
   private boolean filter(final BaseLabel label) {
     return !filterdLabels.contains(label);
