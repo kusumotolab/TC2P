@@ -1,5 +1,6 @@
 package com.github.kusumotolab.tc2p.utils.patternmining.itembag;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import com.github.kusumotolab.tc2p.utils.Try;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -30,6 +32,8 @@ public class RxlItemBag<Item> {
     return Observable.create(emitter -> {
       final List<ITNode<Item>> f1 = extractF1(transactions, dt);
 
+      f1.stream().collect(Collectors.groupingBy(e -> e.getTransactionIds().size())).entrySet().stream().sorted(Comparator.comparingInt(
+          Entry::getKey)).forEach(e -> System.out.println(e.getKey() + ": " + e.getValue().size()));
       final List<Future<?>> futures = Lists.newArrayList();
       for (int i = 0; i < f1.size() - 1; i++) {
         final ITNode<Item> node = f1.get(i);
