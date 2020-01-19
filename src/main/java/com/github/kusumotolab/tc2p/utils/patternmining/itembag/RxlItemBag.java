@@ -32,8 +32,6 @@ public class RxlItemBag<Item> {
     return Observable.create(emitter -> {
       final List<ITNode<Item>> f1 = extractF1(transactions, dt);
 
-      f1.stream().collect(Collectors.groupingBy(e -> e.getTransactionIds().size())).entrySet().stream().sorted(Comparator.comparingInt(
-          Entry::getKey)).forEach(e -> System.out.println(e.getKey() + ": " + e.getValue().size()));
       final List<Future<?>> futures = Lists.newArrayList();
       for (int i = 0; i < f1.size() - 1; i++) {
         final ITNode<Item> node = f1.get(i);
@@ -133,7 +131,7 @@ public class RxlItemBag<Item> {
   }
 
   public enum Threshold {
-    LARGE(500, 10), NORMAL(100, 10), SMALL(10, 10), IGNORE(Integer.MAX_VALUE, Integer.MAX_VALUE);
+    LARGE(200, 30), NORMAL(50, 30), SMALL(10, 10), IGNORE(Integer.MAX_VALUE, Integer.MAX_VALUE);
 
     final int dt;
     final int aft;
