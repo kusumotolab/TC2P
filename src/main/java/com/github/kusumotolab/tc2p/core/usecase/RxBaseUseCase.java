@@ -134,7 +134,7 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
           final Set<ItemAndOccurrence<BaseLabel>> items = Sets.newHashSet();
           final String nodeId = transactionId + "-" + node.getId();
           for (final ActionEnum action : node.getActions()) {
-            final BaseLabel label = new BaseLabel(node.getId(), action, node.getType(), node.getValue(), node.getNewValue());
+            final BaseLabel label = new BaseLabel(node.getId(), action, node.getType());
             final Occurrence occurrence = new Occurrence(nodeId + "-" + action.toString());
             final ItemAndOccurrence<BaseLabel> itemAndOccurrence = new ItemAndOccurrence<>(label, occurrence);
             items.add(itemAndOccurrence);
@@ -166,17 +166,17 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
   }
 
   private final Set<BaseLabel> filterdLabels = Sets.newHashSet(
-      new BaseLabel(0, ActionEnum.DEL, "Block", "", ""),
-      new BaseLabel(0, ActionEnum.INS, "Block", "", ""),
-      new BaseLabel(0, ActionEnum.DEL, "VariableDeclarationStatement", "", ""),
-      new BaseLabel(0, ActionEnum.INS, "VariableDeclarationStatement", "", ""),
-      new BaseLabel(0, ActionEnum.DEL, "ExpressionStatement", "", ""),
-      new BaseLabel(0, ActionEnum.INS, "ExpressionStatement", "", ""),
-      new BaseLabel(0, ActionEnum.DEL, "MethodInvocation", "", ""),
-      new BaseLabel(0, ActionEnum.INS, "MethodInvocation", "", ""),
-      new BaseLabel(0, ActionEnum.UPD, "SimpleName", "", ""),
-      new BaseLabel(0, ActionEnum.DEL, "SimpleName", "", ""),
-      new BaseLabel(0, ActionEnum.INS, "SimpleName", "", "")
+      new BaseLabel(0, ActionEnum.DEL, "Block"),
+      new BaseLabel(0, ActionEnum.INS, "Block"),
+      new BaseLabel(0, ActionEnum.DEL, "VariableDeclarationStatement"),
+      new BaseLabel(0, ActionEnum.INS, "VariableDeclarationStatement"),
+      new BaseLabel(0, ActionEnum.DEL, "ExpressionStatement"),
+      new BaseLabel(0, ActionEnum.INS, "ExpressionStatement"),
+      new BaseLabel(0, ActionEnum.DEL, "MethodInvocation"),
+      new BaseLabel(0, ActionEnum.INS, "MethodInvocation"),
+      new BaseLabel(0, ActionEnum.UPD, "SimpleName"),
+      new BaseLabel(0, ActionEnum.DEL, "SimpleName"),
+      new BaseLabel(0, ActionEnum.INS, "SimpleName")
   );
 
   private boolean filter(final BaseLabel label) {

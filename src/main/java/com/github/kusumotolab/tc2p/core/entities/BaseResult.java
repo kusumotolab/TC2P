@@ -3,6 +3,7 @@ package com.github.kusumotolab.tc2p.core.entities;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.sql.Types;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,11 +12,15 @@ import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import com.github.kusumotolab.tc2p.tools.gson.GsonFactory;
 import com.github.kusumotolab.tc2p.utils.patternmining.itembag.ITNode;
 import com.github.kusumotolab.tc2p.utils.patternmining.itembag.TransactionID;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class BaseResult extends SQLiteObject {
 
   @SQLiteColumn(type = Types.INTEGER, primaryKey = true, autoIncrement = true)
@@ -56,7 +61,7 @@ public class BaseResult extends SQLiteObject {
       return GSON.toJson(value);
     }
     if (field.getName().equals("actions")) {
-      return GSON.toJson(value);
+      return GSON.toJson(Lists.newArrayList(actions));
     }
     return super.encodeField(value, field);
   }
@@ -64,9 +69,15 @@ public class BaseResult extends SQLiteObject {
   @Override
   protected Object decodeField(final Object value, final Field field) {
     if (field.getName().equals("patternPositions")) {
-      Type listType = new TypeToken<Set<PatternPosition>>() {
+      Type listType = new TypeToken<List<PatternPosition>>() {
       }.getType();
       return GSON.fromJson(((String) value), listType);
+    }
+    if (field.getName().equals("actions")) {
+
+      Type setType = new TypeToken<List<BaseLabel>>() {
+      }.getType();
+      return Sets.newHashSet(((List<BaseLabel>) GSON.fromJson(((String) value), setType)));
     }
     return super.decodeField(value, field);
   }

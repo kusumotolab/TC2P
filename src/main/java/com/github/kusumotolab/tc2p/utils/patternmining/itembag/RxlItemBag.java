@@ -1,6 +1,5 @@
 package com.github.kusumotolab.tc2p.utils.patternmining.itembag;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import com.github.kusumotolab.tc2p.utils.Try;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -21,7 +19,9 @@ import com.google.common.collect.Sets.SetView;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class RxlItemBag<Item> {
 
   private final ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -101,7 +101,6 @@ public class RxlItemBag<Item> {
     final ITNode<Item> addNode = f1.get(index);
 
     final Set<TransactionID> newTransactionIds = Sets.intersection(subtree.getTransactionIds(), addNode.getTransactionIds());
-
     final Threshold threshold = Threshold.classify(addNode);
 
     if (newTransactionIds.size() < threshold.aft) {
