@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
 import com.github.kusumotolab.tc2p.core.entities.BaseLabel;
@@ -47,11 +48,12 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
         .map(this::convertToTransaction)
         .collect(Collectors.toSet());
     editScripts.clear();
-
+    final AtomicInteger atomicInteger = new AtomicInteger(0);
     final RxlItemBag<BaseLabel> itemBag = new RxlItemBag<>();
     final Observable<BaseResult> observable = itemBag.mining(transactions, input.getFrequency(), 300)
-        .subscribeOn(Schedulers.single())
+        .observeOn(Schedulers.io())
         .doOnNext(node -> {
+          log.info("No: " + atomicInteger.addAndGet(1));
           log.info("Frequency = " + node.maximumFrequency());
           node.getItemSet().stream()
               .map(this::toString)
