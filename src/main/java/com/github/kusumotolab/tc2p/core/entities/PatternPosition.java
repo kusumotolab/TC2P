@@ -1,8 +1,10 @@
 package com.github.kusumotolab.tc2p.core.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode
 public class PatternPosition {
 
   private final String url;

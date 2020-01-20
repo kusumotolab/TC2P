@@ -16,11 +16,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(exclude = {"id", "frequency", "patternPositions"}, callSuper = false)
 public class BaseResult extends SQLiteObject {
 
   @SQLiteColumn(type = Types.INTEGER, primaryKey = true, autoIncrement = true)

@@ -167,7 +167,7 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
     return commitMessage.substring(commitMessage.indexOf(':') + 1, commitMessage.indexOf('>'));
   }
 
-  private final Set<BaseLabel> filterdLabels = Sets.newHashSet(
+  private static final Set<BaseLabel> filteredLabels = Sets.newHashSet(
       new BaseLabel(0, ActionEnum.DEL, "Block"),
       new BaseLabel(0, ActionEnum.INS, "Block"),
       new BaseLabel(0, ActionEnum.DEL, "VariableDeclarationStatement"),
@@ -181,7 +181,7 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
       new BaseLabel(0, ActionEnum.INS, "SimpleName")
   );
 
-  private boolean filter(final BaseLabel label) {
-    return !filterdLabels.contains(label);
+  public static boolean filter(final BaseLabel label) {
+    return !filteredLabels.contains(label);
   }
 }

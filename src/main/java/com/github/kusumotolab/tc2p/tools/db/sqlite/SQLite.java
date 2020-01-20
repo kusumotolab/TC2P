@@ -1,5 +1,6 @@
 package com.github.kusumotolab.tc2p.tools.db.sqlite;
 
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
@@ -28,6 +29,10 @@ public class SQLite implements DB<SQLiteObject> {
 
   public SQLite() {
     this(DEFAULT_SQLITE_PATH);
+  }
+
+  public SQLite(final Path sqlitePath) {
+    this(sqlitePath.toAbsolutePath().toString());
   }
 
   public SQLite(final String sqlitePath) {

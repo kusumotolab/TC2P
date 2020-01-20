@@ -1,6 +1,7 @@
 package com.github.kusumotolab.tc2p.service;
 
 import com.github.kusumotolab.tc2p.core.controller.CompactBaseDBController;
+import com.github.kusumotolab.tc2p.core.controller.CompareController;
 import com.github.kusumotolab.tc2p.core.controller.ConvertController;
 import com.github.kusumotolab.tc2p.core.controller.CountController;
 import com.github.kusumotolab.tc2p.core.controller.DomainDBCreatorController;
@@ -12,6 +13,7 @@ import com.github.kusumotolab.tc2p.core.presenter.MiningRepositoryPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.ViewPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.BaseUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.CompactBaseDBUseCase;
+import com.github.kusumotolab.tc2p.core.usecase.CompareUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ConvertToJsonUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ConvertToSQLiteUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.CountUsefulUseCase;
@@ -98,6 +100,13 @@ public class Services {
       .presenter(MiningEditPatternPresenter::new)
       .useCase(CompactBaseDBUseCase::new)
       .controller(CompactBaseDBController::new)
+      .resolve();
+
+  @Service(name = "compare")
+  private static final ServiceGraph<?, ?, ?, ?> compare = ServiceGraph.view(ConsoleView::new)
+      .presenter(MiningEditPatternPresenter::new)
+      .useCase(CompareUseCase::new)
+      .controller(CompareController::new)
       .resolve();
 
   static {
