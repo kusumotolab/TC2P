@@ -1,5 +1,6 @@
 package com.github.kusumotolab.tc2p.core.usecase;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
@@ -61,8 +62,9 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
           System.out.println();
         }).map(e -> new BaseResult(input.getProjectName(), e));
 
-    FileUtil.createDirectoryIfNeed(Paths.get("./ignore/base_results"));
-    final SQLite sqLite = new SQLite("./ignore/base_results/" + input.getProjectName() + ".sqlite");
+    final Path baseResultsPath = Paths.get("./ignore/base-results");
+    FileUtil.createDirectoryIfNeed(baseResultsPath);
+    final SQLite sqLite = new SQLite(baseResultsPath.resolve(input.getProjectName() + ".sqlite").toString());
 
     sqLite.connect()
         .andThen(sqLite.createTable(BaseResult.class))

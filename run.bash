@@ -5,7 +5,7 @@ frequency=$2
 timeout=$3
 
 mkdir -p ignore/results
-mkdir -p ignore/base_results
+mkdir -p ignore/base-results
 
 command=$(echo java -jar -Xmx56G build/libs/TC2P-alpha.jar rx-base -p $project -f $frequency)
 
@@ -13,4 +13,4 @@ command=$(echo java -jar -Xmx56G build/libs/TC2P-alpha.jar rx-base -p $project -
     echo $command
     echo ""
     timeout -k 10 $timeout $command
-) 2>&1 | tee ignore/base_results/$(echo $project)__$frequency.txt
+) 2>&1 | tee ignore/base-results/$(echo $project)__$frequency.txt
