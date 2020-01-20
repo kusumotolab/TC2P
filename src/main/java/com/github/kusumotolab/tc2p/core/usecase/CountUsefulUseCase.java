@@ -32,6 +32,7 @@ public class CountUsefulUseCase<V extends View, P extends Presenter<V>> extends 
         .andThen(sqLite.fetch(createQuery(countUsefulConfiguration)))
         .observeOn(Schedulers.single())
         .filter(result -> result.getTags().containsAll(tags))
+        .take(countUsefulConfiguration.getCount())
         .toList()
         .blockingGet();
 
@@ -70,8 +71,6 @@ public class CountUsefulUseCase<V extends View, P extends Presenter<V>> extends 
       case FREQUENCY:
         queryBuilder = queryBuilder.orderBy("frequency", !configuration.isReverse());
     }
-
-    queryBuilder.limit(configuration.getCount());
 
     return queryBuilder.build();
   }
