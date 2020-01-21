@@ -1,33 +1,31 @@
 package com.github.kusumotolab.tc2p.core.usecase;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Freqt;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
-import com.github.kusumotolab.sdl4j.algorithm.mining.tree.TreePattern;
-import com.github.kusumotolab.sdl4j.util.Measure;
-import com.github.kusumotolab.sdl4j.util.Measure.MeasuredResult;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.EditScript;
+import com.github.kusumotolab.tc2p.core.entities.MiningResult;
+import com.github.kusumotolab.tc2p.core.entities.PatternPosition;
 import com.github.kusumotolab.tc2p.core.entities.TreeNode;
 import com.github.kusumotolab.tc2p.core.presenter.IMiningEditPatternPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.interactor.EditScriptFetcher;
-import com.github.kusumotolab.tc2p.core.usecase.interactor.PatternFilter;
 import com.github.kusumotolab.tc2p.framework.View;
-import com.github.kusumotolab.tc2p.utils.patternmining.ParallelFreqt;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
+import com.github.kusumotolab.tc2p.utils.patternmining.RxFreqt;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 
-public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatternPresenter<V>> extends IMiningPatternUseCase<V, P> {
+public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPatternPresenter<V>> extends IMiningPatternUseCase<V, P> {
 
-  private final ParallelFreqt freqt;
-
-  public MiningEditPatternUseCase(final P presenter, final ParallelFreqt freqt) {
+  public RxMiningEditPatternUseCase(final P presenter) {
     super(presenter);
-    this.freqt = freqt;
   }
 
   @Override
@@ -48,20 +46,27 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
     editScripts.clear();
 
     final double minimumSupport = calculateMinimumSupport(trees, input.getFrequency());
-    final MeasuredResult<Set<TreePattern<ASTLabel>>> measuredResult = Measure.time(() -> freqt.mining(trees, minimumSupport));
-    presenter.time("Freqt", measuredResult.getDuration());
+    final RxFreqt freqt = new RxFreqt();
+    final AtomicInteger treeNo = new AtomicInteger(0);
+    final Observable<MiningResult> miningResults = freqt.mining(trees, minimumSupport)
+        .subscribeOn(Schedulers.computation())
+        .observeOn(Schedulers.single())
+        .map(pattern -> {
+          final int no = treeNo.getAndAdd(1);
+          presenter.show("No: " + no);
+          presenter.pattern(pattern);
+          return new MiningResult(no, input.getProjectName(), extractPatternPosition(pattern.getTreeIds()), pattern);
+        });
 
-    final Set<TreePattern<ASTLabel>> patterns = measuredResult.getValue();
-    final MeasuredResult<Set<TreePattern<ASTLabel>>> patternFilterResult = Measure
-        .time(() -> new PatternFilter().execute(new PatternFilter.Input(patterns)));
-    presenter.time("Filtering", patternFilterResult.getDuration());
-
-    patternFilterResult.getValue().stream()
-        .sorted(Comparator.comparingInt(e -> e.getRootNode().getDescents().size()))
-        .forEach(presenter::pattern);
-
-    presenter.endMiningPatterns(patternFilterResult.getValue());
+    final SQLite sqLite = new SQLite("ignore/tc2p-results-DB/" + input.getProjectName() + "__" + input.getFrequency() + ".sqlite");
+    sqLite.connect()
+        .andThen(sqLite.createTable(MiningResult.class))
+        .andThen(sqLite.insert(miningResults))
+        .andThen(sqLite.close())
+        .andThen(freqt.shutdown())
+        .blockingAwait();
     presenter.time("Total Time", stopwatch.elapsed());
+
   }
 
   private Node<ASTLabel> convertToNode(final EditScript editScript) {
@@ -95,6 +100,18 @@ public class MiningEditPatternUseCase<V extends View, P extends IMiningEditPatte
     return repositoryBaseURL + "/compare/" + extractCommitIdFromFinerGitCommitMessage(editScript.getSrcCommitMessage()) + "..."
         + extractCommitIdFromFinerGitCommitMessage(editScript.getDstCommitMessage())
         + "    // " + editScript.getSrcName() + " <=> " + editScript.getDstName();
+  }
+
+  private PatternPosition extractPatternPosition(final String treeId) {
+    final String url = treeId.split(" ")[0];
+    final String mjavadiff = treeId.split("//")[1];
+    return new PatternPosition(url, mjavadiff);
+  }
+
+  private List<PatternPosition> extractPatternPosition(final Set<String> treeIds) {
+    return treeIds.stream()
+        .map(this::extractPatternPosition)
+        .collect(Collectors.toList());
   }
 
   private String extractCommitIdFromFinerGitCommitMessage(final String commitMessage) {

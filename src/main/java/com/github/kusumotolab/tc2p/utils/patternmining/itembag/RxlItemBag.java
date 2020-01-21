@@ -24,9 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RxlItemBag<Item> {
 
-  private final ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+  //  private final ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 //
-//  private final ExecutorService service = Executors.newFixedThreadPool(1);
+  private final ExecutorService service = Executors.newFixedThreadPool(1);
 
   public Observable<ITNode<Item>> mining(final Set<Transaction<Item>> transactions, final int minimumSupport, final int dt) {
     return Observable.create(emitter -> {

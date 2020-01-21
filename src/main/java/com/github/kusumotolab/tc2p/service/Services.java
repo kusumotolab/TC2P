@@ -20,6 +20,7 @@ import com.github.kusumotolab.tc2p.core.usecase.CountUsefulUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.DomainDBCreateUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.MiningEditPatternUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.RxBaseUseCase;
+import com.github.kusumotolab.tc2p.core.usecase.RxMiningEditPatternUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.SaveTreeNodeRepositoryUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ViewerUseCase;
 import com.github.kusumotolab.tc2p.core.view.ConsoleView;
@@ -42,6 +43,14 @@ public class Services {
       .useCase(presenter -> new MiningEditPatternUseCase<>(presenter, new ParallelFreqt()))
       .controller(MiningEditPatternController::new)
       .resolve();
+
+  @Service(name = "rx-mining")
+  private static final ServiceGraph<?, ?, ?, ?> rxMining = ServiceGraph.view(ConsoleView::new)
+      .presenter(MiningEditPatternPresenter::new)
+      .useCase(RxMiningEditPatternUseCase::new)
+      .controller(MiningEditPatternController::new)
+      .resolve();
+
 
   @Service(name = "mining-domain")
   private static final ServiceGraph<?, ?, ?, ?> miningDomain = ServiceGraph.view(ConsoleView::new)

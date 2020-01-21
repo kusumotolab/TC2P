@@ -6,7 +6,6 @@ import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -18,7 +17,7 @@ public class SQLInsertExecutor extends SQLCommandExecutor {
 
   public <Model extends SQLiteObject> Completable execute(final Observable<Model> observer, final int bufferSize) {
     return Completable.create(emitter -> observer
-        .subscribeOn(Schedulers.single()).buffer(bufferSize)
+        .buffer(bufferSize)
         .doOnNext(list -> {
           if (list.isEmpty()) {
             return;
@@ -37,7 +36,6 @@ public class SQLInsertExecutor extends SQLCommandExecutor {
           connection.commit();
         })
         .subscribe(e -> {
-        }, Throwable::printStackTrace, emitter::onComplete))
-        .subscribeOn(Schedulers.io());
+        }, Throwable::printStackTrace, emitter::onComplete));
   }
 }

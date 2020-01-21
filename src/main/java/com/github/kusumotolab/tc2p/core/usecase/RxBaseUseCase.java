@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
@@ -52,7 +53,8 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
     final AtomicInteger atomicInteger = new AtomicInteger(0);
     final RxlItemBag<BaseLabel> itemBag = new RxlItemBag<>();
     final Observable<BaseResult> observable = itemBag.mining(transactions, input.getFrequency(), 300)
-        .observeOn(Schedulers.single())
+        .subscribeOn(Schedulers.computation())
+        .observeOn(Schedulers.io())
         .doOnNext(node -> {
           log.info("No: " + atomicInteger.addAndGet(1));
           log.info("Frequency = " + node.maximumFrequency());
@@ -77,14 +79,6 @@ public class RxBaseUseCase<V extends View, P extends IMiningEditPatternPresenter
 
   private String toString(final BaseLabel label) {
     String text = "{action = " + label.getAction().toStringWithColor() + ", type = " + Colors.purple("\"" + label.getType() + "\"");
-//    final String value = label.getValue();
-//    if (value != null && !value.isEmpty()) {
-//      text += ", value = " + Colors.purple("\"" + value + "\"");
-//    }
-//    final String newValue = label.getNewValue();
-//    if (newValue != null && !newValue.isEmpty()) {
-//      text += ", newValue = " + Colors.purple("\"" + newValue + "\"");
-//    }
     return text + "}";
   }
 

@@ -4,11 +4,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.sql.Types;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Label;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
+import com.github.kusumotolab.sdl4j.algorithm.mining.tree.TreePattern;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteColumn;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteObject;
 import com.github.kusumotolab.tc2p.tools.gson.GsonFactory;
@@ -67,6 +69,20 @@ public class MiningResult extends SQLiteObject {
   private UsefulState usefulState = UsefulState.NONE;
 
   private static final Gson GSON = GsonFactory.create();
+
+  public MiningResult(final int id, final String projectName, final List<PatternPosition> patternPositions, final TreePattern<ASTLabel> pattern) {
+    this.id = id;
+    this.projectName = projectName;
+    this.frequency = pattern.countPatten();
+    final List<Label<ASTLabel>> labels = pattern.getRootNode().getLabels();
+    this.maxDepth = labels.stream().map(Label::getDepth).max(Comparator.comparingInt(e -> e)).orElse(0);
+    this.size = labels.size();
+    this.root = pattern.getRootNode();
+    this.actionSize = root.getLabels().stream()
+        .reduce(0, (result, label) -> result + label.getLabel().getActions().size(), Integer::sum);
+    this.patternPositions = patternPositions;
+    this.tags = convertToTags(root);
+  }
 
   public MiningResult(final int id, final String projectName, final int frequency, final int maxDepth, final int size,
       final Node<ASTLabel> root, final List<PatternPosition> patternPositions) {
