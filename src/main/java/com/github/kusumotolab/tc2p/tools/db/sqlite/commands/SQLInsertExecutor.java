@@ -16,7 +16,7 @@ public class SQLInsertExecutor extends SQLCommandExecutor {
   }
 
   public <Model extends SQLiteObject> Completable execute(final Observable<Model> observer, final int bufferSize) {
-    return Completable.create(emitter -> observer
+    return Completable.fromObservable(observer
         .buffer(bufferSize)
         .doOnNext(list -> {
           if (list.isEmpty()) {
@@ -34,8 +34,27 @@ public class SQLInsertExecutor extends SQLCommandExecutor {
           }
           prepareStatement.executeBatch();
           connection.commit();
-        })
-        .subscribe(e -> {
-        }, Throwable::printStackTrace, emitter::onComplete));
+        }));
+//    return Completable.create(emitter -> observer
+//        .buffer(bufferSize)
+//        .doOnNext(list -> {
+//          if (list.isEmpty()) {
+//            return;
+//          }
+//          log.debug("Insert " + list.size() + " Objects.");
+//          final Connection connection = sqLite.getConnection();
+//          connection.setAutoCommit(false);
+//          final SQLiteObject sampleObject = list.get(0);
+//          final String prepareStatementCommand = sampleObject.prepareStatementCommand();
+//          final PreparedStatement prepareStatement = connection.prepareStatement(prepareStatementCommand);
+//
+//          for (final SQLiteObject object : list) {
+//            object.addBatchCommand(prepareStatement);
+//          }
+//          prepareStatement.executeBatch();
+//          connection.commit();
+//        })
+//        .subscribe(e -> {
+//        }, Throwable::printStackTrace, emitter::onComplete));
   }
 }

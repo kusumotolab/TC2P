@@ -10,6 +10,7 @@ import com.github.kusumotolab.tc2p.core.entities.ActionEnum;
 import com.google.common.collect.Lists;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 public class NodeAdapter extends TypeAdapter<Node<ASTLabel>> {
@@ -66,10 +67,18 @@ public class NodeAdapter extends TypeAdapter<Node<ASTLabel>> {
             in.endArray();
             break;
           case "value":
-            value = in.nextString();
+            if (in.peek() == JsonToken.NULL) {
+              in.nextNull();
+            } else {
+              value = in.nextString();
+            }
             break;
           case "newValue":
-            newValue = in.nextString();
+            if (in.peek() == JsonToken.NULL) {
+              in.nextNull();
+            } else {
+              newValue = in.nextString();
+            }
             break;
           case "type":
             type = in.nextString();
