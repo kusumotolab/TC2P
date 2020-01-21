@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Label;
 import com.github.kusumotolab.sdl4j.algorithm.mining.tree.Node;
+import com.github.kusumotolab.sdl4j.algorithm.mining.tree.TreePattern;
 import com.github.kusumotolab.tc2p.core.entities.ASTLabel;
 import com.github.kusumotolab.tc2p.core.entities.EditScript;
 import com.github.kusumotolab.tc2p.core.entities.MiningResult;
@@ -49,6 +51,7 @@ public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPat
     final RxFreqt freqt = new RxFreqt();
     final AtomicInteger treeNo = new AtomicInteger(0);
     final Observable<MiningResult> miningResults = freqt.mining(trees, minimumSupport)
+        .filter(this::hasAction)
         .subscribeOn(Schedulers.computation())
         .observeOn(Schedulers.single())
         .map(pattern -> {
@@ -67,6 +70,13 @@ public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPat
         .blockingAwait();
     presenter.time("Total Time", stopwatch.elapsed());
 
+  }
+
+  private boolean hasAction(final TreePattern<ASTLabel> pattern) {
+    return !pattern.getRootNode().getLabels().stream()
+        .map(Label::getLabel)
+        .map(ASTLabel::getActions)
+        .allMatch(List::isEmpty);
   }
 
   private Node<ASTLabel> convertToNode(final EditScript editScript) {
