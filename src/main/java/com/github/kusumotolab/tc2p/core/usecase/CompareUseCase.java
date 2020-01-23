@@ -37,12 +37,9 @@ public class CompareUseCase<V extends View, P extends Presenter<V>> extends ICom
     baseSQLite.connect()
         .andThen(tc2pSQLite.connect()).blockingAwait();
 
-    final Set<Set<BaseLabel>> biggestActions = Sets.newConcurrentHashSet();
 
     final Observable<BaseResult> convertedMiningResults = tc2pSQLite.fetch(createQueryForMiningResult())
-        .map(this::convertToBaseResult)
-        .filter(results -> biggestActions.stream().noneMatch(biggestAction -> biggestAction.containsAll(results.getActions())))
-        .doOnNext(results -> biggestActions.add(results.getActions()));
+        .map(this::convertToBaseResult);
 
     final Map<Set<BaseLabel>, BaseResult> map = Maps.newHashMap();
     convertedMiningResults.subscribe(result -> {
@@ -65,19 +62,16 @@ public class CompareUseCase<V extends View, P extends Presenter<V>> extends ICom
     final Observable<BaseResult> baseResults = baseSQLite.fetch(createQueryForBaseResult());
     baseResults.subscribe(baseSet::add);
 
-    final Set<BaseResult> completedBaseSet = baseSet;
-    final Set<BaseResult> completedTc2pSet = completeSubset(miningSet);
-
-    final SetView<BaseResult> intersection = Sets.intersection(completedBaseSet, completedTc2pSet);
-    final SetView<BaseResult> baseOnly = Sets.difference(completedBaseSet, intersection);
-    final SetView<BaseResult> tc2pOnly = Sets.difference(completedTc2pSet, intersection);
+    final SetView<BaseResult> intersection = Sets.intersection(baseSet, miningSet);
+    final SetView<BaseResult> baseOnly = Sets.difference(baseSet, intersection);
+    final SetView<BaseResult> tc2pOnly = Sets.difference(miningSet, intersection);
 
     presenter.show("The Base: " + baseOnly.size());
     presenter.show("Intersection: " + intersection.size());
     presenter.show("TC2P: " + tc2pOnly.size());
 
     final long countPatternWhichContainsMove = tc2pOnly.parallelStream()
-        .filter(baseResult -> baseResult.getActions().stream()
+        .filter(baseResult -> baseResult.getActions().parallelStream()
             .map(BaseLabel::getAction)
             .anyMatch(e -> e.equals(ActionEnum.SRC_MOV) || e.equals(ActionEnum.DST_MOVE)))
         .count();
