@@ -51,16 +51,14 @@ public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPat
     final RxFreqt freqt = new RxFreqt();
     final AtomicInteger treeNo = new AtomicInteger(0);
     final Observable<MiningResult> miningResults = freqt.mining(trees, minimumSupport)
-//        .filter(this::hasAction)
         .subscribeOn(Schedulers.computation())
         .observeOn(Schedulers.io())
         .map(pattern -> {
-          final int no = treeNo.getAndAdd(1);
-//          presenter.show("No: " + no);
-//          presenter.pattern(pattern);
+          final int no = treeNo.addAndGet(1);
           return new MiningResult(no, input.getProjectName(), extractPatternPosition(pattern.getTreeIds()), pattern);
         });
 
+    /*
     final SQLite sqLite = new SQLite("ignore/tc2p-results-DB/" + input.getProjectName() + "__" + input.getFrequency() + ".sqlite");
     sqLite.connect()
         .andThen(sqLite.createTable(MiningResult.class))
@@ -68,6 +66,9 @@ public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPat
         .andThen(sqLite.close())
         .andThen(freqt.shutdown())
         .blockingAwait();
+     */
+    miningResults.blockingSubscribe();
+    presenter.show("# of Patterns: " + treeNo.get());
     presenter.time("Total Time", stopwatch.elapsed());
 
   }
