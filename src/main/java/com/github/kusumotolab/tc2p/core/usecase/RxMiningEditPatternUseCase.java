@@ -21,6 +21,7 @@ import com.github.kusumotolab.tc2p.utils.patternmining.RxFreqt;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -67,7 +68,9 @@ public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPat
         .andThen(freqt.shutdown())
         .blockingAwait();
      */
-    miningResults.blockingSubscribe();
+    Completable.fromObservable(miningResults)
+        .andThen(freqt.shutdown())
+        .blockingAwait();
     presenter.show("# of Patterns: " + treeNo.get());
     presenter.time("Total Time", stopwatch.elapsed());
 
