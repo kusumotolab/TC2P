@@ -3,7 +3,6 @@ package com.github.kusumotolab.tc2p.core.entities;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.sql.Types;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,12 +19,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"id", "frequency", "patternPositions"}, callSuper = false)
+@EqualsAndHashCode(of = {"actions"}, callSuper = false)
 public class BaseResult extends SQLiteObject {
 
   @SQLiteColumn(type = Types.INTEGER, primaryKey = true, autoIncrement = true)
