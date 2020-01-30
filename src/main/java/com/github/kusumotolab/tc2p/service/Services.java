@@ -27,6 +27,7 @@ import com.github.kusumotolab.tc2p.core.view.ConsoleView;
 import com.github.kusumotolab.tc2p.core.view.InteractiveConsoleView;
 import com.github.kusumotolab.tc2p.utils.patternmining.MultipleParallelFreqt;
 import com.github.kusumotolab.tc2p.utils.patternmining.ParallelFreqt;
+import com.github.kusumotolab.tc2p.utils.patternmining.RxMultipleFreqt;
 
 public class Services {
 
@@ -48,6 +49,13 @@ public class Services {
   private static final ServiceGraph<?, ?, ?, ?> rxMining = ServiceGraph.view(ConsoleView::new)
       .presenter(MiningEditPatternPresenter::new)
       .useCase(RxMiningEditPatternUseCase::new)
+      .controller(MiningEditPatternController::new)
+      .resolve();
+
+  @Service(name = "rx-mining-domain")
+  private static final ServiceGraph<?, ?, ?, ?> rxMiningDomain = ServiceGraph.view(ConsoleView::new)
+      .presenter(MiningEditPatternPresenter::new)
+      .useCase(e -> new RxMiningEditPatternUseCase<>(e, new RxMultipleFreqt()))
       .controller(MiningEditPatternController::new)
       .resolve();
 

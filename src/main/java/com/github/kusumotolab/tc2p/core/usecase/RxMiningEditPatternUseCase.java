@@ -27,8 +27,16 @@ import io.reactivex.schedulers.Schedulers;
 
 public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPatternPresenter<V>> extends IMiningPatternUseCase<V, P> {
 
+  private final RxFreqt freqt;
+
   public RxMiningEditPatternUseCase(final P presenter) {
     super(presenter);
+    this.freqt = new RxFreqt();
+  }
+
+  public RxMiningEditPatternUseCase(final P presenter, final RxFreqt freqt) {
+    super(presenter);
+    this.freqt = freqt;
   }
 
   @Override
@@ -49,7 +57,7 @@ public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPat
     editScripts.clear();
 
     final double minimumSupport = calculateMinimumSupport(trees, input.getFrequency());
-    final RxFreqt freqt = new RxFreqt();
+
     final AtomicInteger treeNo = new AtomicInteger(0);
     final Observable<MiningResult> miningResults = freqt.mining(trees, minimumSupport)
         .subscribeOn(Schedulers.computation())
@@ -59,7 +67,6 @@ public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPat
           return new MiningResult(no, input.getProjectName(), extractPatternPosition(pattern.getTreeIds()), pattern);
         });
 
-    /*
     final SQLite sqLite = new SQLite("ignore/tc2p-results-DB/" + input.getProjectName() + "__" + input.getFrequency() + ".sqlite");
     sqLite.connect()
         .andThen(sqLite.createTable(MiningResult.class))
@@ -67,7 +74,6 @@ public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPat
         .andThen(sqLite.close())
         .andThen(freqt.shutdown())
         .blockingAwait();
-     */
     Completable.fromObservable(miningResults)
         .andThen(freqt.shutdown())
         .blockingAwait();

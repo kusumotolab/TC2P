@@ -123,6 +123,7 @@ public class RxFreqt {
           final Set<String> ids = Sets.newHashSet(idMap.get(label));
           return new TreePattern<>(Node.createRootNode("", label), ids, count);
         })
+        .filter(e -> this.filterPattern(e, borderline))
         .collect(Collectors.toSet());
     results.forEach(emitter::onNext);
     return results;
