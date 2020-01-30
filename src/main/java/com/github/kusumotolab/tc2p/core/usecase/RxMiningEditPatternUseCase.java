@@ -74,9 +74,11 @@ public class RxMiningEditPatternUseCase<V extends View, P extends IMiningEditPat
         .andThen(sqLite.close())
         .andThen(freqt.shutdown())
         .blockingAwait();
+    /*
     Completable.fromObservable(miningResults)
         .andThen(freqt.shutdown())
         .blockingAwait();
+     */
     presenter.show("# of Patterns: " + treeNo.get());
     presenter.time("Total Time", stopwatch.elapsed());
 
