@@ -3,6 +3,7 @@ package com.github.kusumotolab.tc2p.core.entities;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.github.gumtreediff.tree.Tree;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 
@@ -52,7 +53,11 @@ public class TreeNode {
     final TreeNode treeNode = new TreeNode(projectName, srcCommitId, srcFilePath, dstCommitId, dstFilePath, id, pos, this, actions, value,
         newValue, type);
     children.add(treeNode);
-    children.sort(Comparator.comparingInt(e -> e.pos));
+    final Comparator<TreeNode> comparator = Comparator.comparingInt(e -> e.pos);
+    children.sort(comparator.thenComparingInt(node -> node.getActions().stream()
+        .map(ActionEnum::getPriority)
+        .min(Comparator.comparingInt(e -> e))
+        .orElse(0)));
     return treeNode;
   }
 

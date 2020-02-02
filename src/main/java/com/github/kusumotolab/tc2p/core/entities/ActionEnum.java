@@ -21,4 +21,20 @@ public enum ActionEnum {
   public String toStringWithColor() {
     return getColorCode() + name() + "\u001b[00m";
   }
+
+  public int getPriority() {
+    switch (this) {
+      case INS:
+        return 1;
+      case DEL:
+        return 2;
+      case SRC_MOV:
+        return 3;
+      case DST_MOVE:
+        return 4;
+      case UPD:
+        return 5;
+    }
+    throw new IllegalStateException();
+  }
 }
