@@ -1,5 +1,6 @@
 package com.github.kusumotolab.tc2p.service;
 
+import com.github.kusumotolab.tc2p.core.controller.BaseController;
 import com.github.kusumotolab.tc2p.core.controller.CompactBaseDBController;
 import com.github.kusumotolab.tc2p.core.controller.CompareController;
 import com.github.kusumotolab.tc2p.core.controller.ConvertController;
@@ -57,6 +58,13 @@ public class Services {
       .presenter(MiningEditPatternPresenter::new)
       .useCase(e -> new RxMiningEditPatternUseCase<>(e, new RxMultipleFreqt()))
       .controller(MiningEditPatternController::new)
+      .resolve();
+
+  @Service(name = "base-view")
+  private static final ServiceGraph<?, ?, ?, ?> baseView = ServiceGraph.view(ConsoleView::new)
+      .presenter(MiningEditPatternPresenter::new)
+      .useCase(BaseUseCase::new)
+      .controller(BaseController::new)
       .resolve();
 
 
