@@ -76,6 +76,7 @@ public class CompareUseCase<V extends View, P extends Presenter<V>> extends ICom
 
     final SQLite sqLite = new SQLite("ignore/base-only/all.sqlite");
     sqLite.connect()
+        .andThen(sqLite.createTable(BaseResult.class))
         .andThen(sqLite.insert(Observable.fromIterable(baseOnly)))
         .andThen(sqLite.close())
         .blockingAwait();
