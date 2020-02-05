@@ -13,6 +13,7 @@ import com.github.kusumotolab.tc2p.core.presenter.MiningEditPatternPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.MiningRepositoryPresenter;
 import com.github.kusumotolab.tc2p.core.presenter.ViewPresenter;
 import com.github.kusumotolab.tc2p.core.usecase.BaseUseCase;
+import com.github.kusumotolab.tc2p.core.usecase.BaseViewerUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.CompactBaseDBUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.CompareUseCase;
 import com.github.kusumotolab.tc2p.core.usecase.ConvertToJsonUseCase;
@@ -63,7 +64,7 @@ public class Services {
   @Service(name = "base-view")
   private static final ServiceGraph<?, ?, ?, ?> baseView = ServiceGraph.view(ConsoleView::new)
       .presenter(MiningEditPatternPresenter::new)
-      .useCase(BaseUseCase::new)
+      .useCase(BaseViewerUseCase::new)
       .controller(BaseController::new)
       .resolve();
 

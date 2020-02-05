@@ -73,6 +73,12 @@ public class CompareUseCase<V extends View, P extends Presenter<V>> extends ICom
             .anyMatch(e -> e.equals(ActionEnum.SRC_MOV) || e.equals(ActionEnum.DST_MOVE)))
         .count();
     presenter.show("TC2P(Move): " + countPatternWhichContainsMove);
+
+    final SQLite sqLite = new SQLite("ignore-base-only/all.sqlite");
+    sqLite.connect()
+        .andThen(sqLite.insert(Observable.fromIterable(baseOnly)))
+        .andThen(sqLite.close())
+        .blockingAwait();
   }
 
   private Query<BaseResult> createQueryForBaseResult() {
