@@ -15,6 +15,6 @@ public abstract class IBaseViewerUseCase<V extends View, P extends Presenter<V>>
 
   @Data
   public static class Input {
-    private final Path dbDirPath;
+    private final Path dbPath;
   }
 }

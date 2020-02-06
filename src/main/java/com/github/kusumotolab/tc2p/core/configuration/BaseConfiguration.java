@@ -8,6 +8,6 @@ import lombok.Getter;
 public class BaseConfiguration {
 
   @Getter
-  @Option(name = "-d", handler = PathOptionHandler.class)
+  @Option(name = "-p", handler = PathOptionHandler.class)
   private Path dbPath;
 }

@@ -109,16 +109,16 @@ public class SQLite implements DB<SQLiteObject> {
     return fetch(single, 1000000);
   }
 
-  public <Model extends SQLiteObject> Observable<Model> fetch(final Query<Model> query) {
+  public <Model> Observable<Model> fetch(final Query<Model> query) {
     return fetch(query, 1000000);
   }
 
-  public <Model extends SQLiteObject> Observable<Model> fetch(final Single<Query<Model>> single,
+  public <Model> Observable<Model> fetch(final Single<Query<Model>> single,
       final int fetchSize) {
     return single.flatMapObservable(query -> fetch(query, fetchSize));
   }
 
-  public <Model extends SQLiteObject> Observable<Model> fetch(final Query<Model> query,
+  public <Model> Observable<Model> fetch(final Query<Model> query,
       final int fetchSize) {
     return new SQLSelectExecutor<Model>(this).execute(query, fetchSize);
   }

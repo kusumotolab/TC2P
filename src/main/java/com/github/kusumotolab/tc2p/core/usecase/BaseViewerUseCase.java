@@ -1,19 +1,14 @@
 package com.github.kusumotolab.tc2p.core.usecase;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.stream.Collectors;
-import org.jgrapht.graph.AbstractBaseGraph;
 import com.github.kusumotolab.tc2p.core.entities.BaseLabel;
 import com.github.kusumotolab.tc2p.core.entities.BaseResult;
 import com.github.kusumotolab.tc2p.core.entities.PatternPosition;
 import com.github.kusumotolab.tc2p.framework.Presenter;
 import com.github.kusumotolab.tc2p.framework.View;
+import com.github.kusumotolab.tc2p.tools.db.Query;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery;
 import com.github.kusumotolab.tc2p.utils.RxCommandLine;
@@ -27,23 +22,15 @@ public class BaseViewerUseCase<V extends View, P extends Presenter<V>> extends I
 
   @Override
   public void execute(final Input input) {
-    final List<Path> dbPaths = Arrays.stream(Objects.requireNonNull(input.getDbDirPath().toFile().listFiles()))
-        .filter(e -> e.getName().endsWith("sqlite"))
-        .map(File::toPath)
-        .collect(Collectors.toList());
+    final int size = countSize(input.getDbPath());
 
-    final List<BaseResult> results = dbPaths.stream()
-        .flatMap(e -> fetch(e).stream())
-        .collect(Collectors.toList());
-
-    final int size = results.size();
     final Random random = new Random(0);
     final Scanner scanner = new Scanner(System.in);
 
     for (int i = 0; i < size; i++) {
       final int index = random.nextInt(size);
-      final BaseResult baseResult = results.get(index);
-      presenter.show("index = " + index);
+      final BaseResult baseResult = fetch(input.getDbPath(), index);
+      presenter.show("index = " + i);
       presenter.show("project_name = " + baseResult.getProjectName());
       for (final BaseLabel action : baseResult.getActions()) {
         presenter.show(action.getAction().toStringWithColor() + " " + action.getType());
@@ -61,22 +48,32 @@ public class BaseViewerUseCase<V extends View, P extends Presenter<V>> extends I
     scanner.close();
   }
 
-  private List<BaseResult> fetch(final Path path) {
+  private int countSize(final Path path) {
+    final SQLite sqLite = new SQLite(path);
+    Query<Integer> query = SQLiteQuery.selectInteger().column("COUNT(*)").from(BaseResult.class).build();
+    final Integer size = sqLite.connect()
+        .andThen(sqLite.fetch(query))
+        .blockingFirst();
+    sqLite.close().blockingAwait();
+    return size;
+  }
+
+  private BaseResult fetch(final Path path, int index) {
     final SQLite sqLite = new SQLite(path);
 
-    final List<BaseResult> baseResults = sqLite.connect()
+    final BaseResult baseResult = sqLite.connect()
         .andThen(sqLite.fetch(SQLiteQuery.select(BaseResult.class)
             .from(BaseResult.class)
+            .offset(index)
+            .limit(1)
             .build()))
-        .toList()
-        .blockingGet();
+        .blockingFirst();
     sqLite.close().blockingAwait();
-    return baseResults;
+    return baseResult;
   }
 
   private void open(final PatternPosition position) {
     final RxCommandLine commandLine = new RxCommandLine();
     commandLine.execute("open", position.getUrl()).blockingGet();
   }
-
 }

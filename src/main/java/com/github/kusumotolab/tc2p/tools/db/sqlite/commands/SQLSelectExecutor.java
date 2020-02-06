@@ -9,7 +9,7 @@ import io.reactivex.Observable;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SQLSelectExecutor<Model extends SQLiteObject> extends SQLCommandExecutor {
+public class SQLSelectExecutor<Model> extends SQLCommandExecutor {
 
   public SQLSelectExecutor(final SQLite sqLite) {
     super(sqLite);
