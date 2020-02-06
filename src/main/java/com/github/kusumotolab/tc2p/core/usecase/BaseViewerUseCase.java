@@ -35,7 +35,7 @@ public class BaseViewerUseCase<V extends View, P extends Presenter<V>> extends I
 
     final List<BaseResult> baseResults = fetch(input.getDbPath(), HEAD);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 1000; i++) {
       final int index = random.nextInt(HEAD);
       final BaseResult baseResult = baseResults.get(index);
       presenter.show("index = " + i);
