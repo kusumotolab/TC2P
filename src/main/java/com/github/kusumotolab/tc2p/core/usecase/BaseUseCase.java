@@ -60,7 +60,12 @@ public class BaseUseCase<V extends View, P extends IMiningEditPatternPresenter<V
 
     final ITNode<BaseLabel> rootNode = measuredResult.getValue();
     System.out.println(rootNode.size());
-    final List<ITNode<BaseLabel>> nodes = extractLeaf(rootNode, Lists.newArrayList()).stream()
+
+//    final List<ITNode<BaseLabel>> nodes = extractLeaf(rootNode, Lists.newArrayList()).stream()
+//        .sorted(Comparator.comparingInt(node -> node.getItemSet().size()))
+//        .collect(Collectors.toList());
+
+    final List<ITNode<BaseLabel>> nodes = extractNode(rootNode, Lists.newArrayList()).stream()
         .sorted(Comparator.comparingInt(node -> node.getItemSet().size()))
         .collect(Collectors.toList());
     for (final ITNode<BaseLabel> node : nodes) {
@@ -100,6 +105,14 @@ public class BaseUseCase<V extends View, P extends IMiningEditPatternPresenter<V
       results.add(root);
       return results;
     }
+    for (final ITNode<BaseLabel> child : root.getChildren()) {
+      extractLeaf(child, results);
+    }
+    return results;
+  }
+
+  private List<ITNode<BaseLabel>> extractNode(final ITNode<BaseLabel> root, final List<ITNode<BaseLabel>> results) {
+    results.add(root);
     for (final ITNode<BaseLabel> child : root.getChildren()) {
       extractLeaf(child, results);
     }

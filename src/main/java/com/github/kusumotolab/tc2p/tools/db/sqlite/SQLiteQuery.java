@@ -123,6 +123,11 @@ public class SQLiteQuery {
       return this;
     }
 
+    public Builder<R> orderBy(final String column, final Order order) {
+      orders.add(new SQLiteOrder(column, order));
+      return this;
+    }
+
     public Builder<R> groupBy(final List<String> groupsBys) {
       this.groupsBys.addAll(groupsBys);
       return this;

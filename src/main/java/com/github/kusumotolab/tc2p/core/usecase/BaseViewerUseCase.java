@@ -1,20 +1,28 @@
 package com.github.kusumotolab.tc2p.core.usecase;
 
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
-import com.github.kusumotolab.tc2p.core.entities.BaseLabel;
+import java.util.Set;
+import java.util.stream.Collectors;
 import com.github.kusumotolab.tc2p.core.entities.BaseResult;
 import com.github.kusumotolab.tc2p.core.entities.PatternPosition;
 import com.github.kusumotolab.tc2p.framework.Presenter;
 import com.github.kusumotolab.tc2p.framework.View;
 import com.github.kusumotolab.tc2p.tools.db.Query;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLite;
+import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteOrder.Order;
 import com.github.kusumotolab.tc2p.tools.db.sqlite.SQLiteQuery;
 import com.github.kusumotolab.tc2p.utils.RxCommandLine;
 import com.github.kusumotolab.tc2p.utils.Try;
+import com.google.common.collect.Sets;
 
 public class BaseViewerUseCase<V extends View, P extends Presenter<V>> extends IBaseViewerUseCase<V, P> {
+
+  private final int HEAD = 1000;
 
   public BaseViewerUseCase(final P presenter) {
     super(presenter);
@@ -22,22 +30,36 @@ public class BaseViewerUseCase<V extends View, P extends Presenter<V>> extends I
 
   @Override
   public void execute(final Input input) {
-    final int size = countSize(input.getDbPath());
-
     final Random random = new Random(0);
     final Scanner scanner = new Scanner(System.in);
 
-    for (int i = 0; i < size; i++) {
-      final int index = random.nextInt(size);
-      final BaseResult baseResult = fetch(input.getDbPath(), index);
+    final List<BaseResult> baseResults = fetch(input.getDbPath(), HEAD);
+
+    for (int i = 0; i < 10; i++) {
+      final int index = random.nextInt(HEAD);
+      final BaseResult baseResult = baseResults.get(index);
       presenter.show("index = " + i);
       presenter.show("project_name = " + baseResult.getProjectName());
-      for (final BaseLabel action : baseResult.getActions()) {
-        presenter.show(action.getAction().toStringWithColor() + " " + action.getType());
-      }
+      presenter.show("frequency = " + baseResult.getFrequency());
+      presenter.show("");
 
-      for (int pi = 0; pi < baseResult.getPatternPositions().size(); pi++) {
-        final PatternPosition position = baseResult.getPatternPositions().get(pi);
+      baseResult.getActions().stream().sorted(Comparator.comparingInt(e -> e.getAction().getPriority()))
+          .forEach(action -> {
+            presenter.show(action.getAction().toStringWithColor() + " " + action.getType());
+          });
+
+      presenter.show("");
+
+      final Set<String> urls = Sets.newHashSet();
+      final List<PatternPosition> sortedPositions = baseResult.getPatternPositions().stream().sorted(Comparator.comparing(PatternPosition::getUrl))
+          .collect(Collectors.toList());
+      for (int pi = 0; pi < Math.min(10, sortedPositions.size()); pi++) {
+        final PatternPosition position = sortedPositions.get(pi);
+
+        if (!urls.contains(position.getUrl())) {
+          presenter.show(position.getUrl());
+          urls.add(position.getUrl());
+        }
         open(position);
         presenter.show(pi + ": " + position.getMjavaDiff());
         Try.lambda(() -> Thread.sleep(10));
@@ -58,18 +80,19 @@ public class BaseViewerUseCase<V extends View, P extends Presenter<V>> extends I
     return size;
   }
 
-  private BaseResult fetch(final Path path, int index) {
+  private List<BaseResult> fetch(final Path path, int limit) {
     final SQLite sqLite = new SQLite(path);
 
-    final BaseResult baseResult = sqLite.connect()
+    final List<BaseResult> baseResults = sqLite.connect()
         .andThen(sqLite.fetch(SQLiteQuery.select(BaseResult.class)
             .from(BaseResult.class)
-            .offset(index)
-            .limit(1)
+            .orderBy("action_size", Order.DESC)
+            .limit(limit)
             .build()))
-        .blockingFirst();
+        .toList()
+        .blockingGet();
     sqLite.close().blockingAwait();
-    return baseResult;
+    return baseResults;
   }
 
   private void open(final PatternPosition position) {
