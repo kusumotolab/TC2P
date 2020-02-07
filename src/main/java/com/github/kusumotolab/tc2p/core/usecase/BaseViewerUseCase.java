@@ -44,28 +44,29 @@ public class BaseViewerUseCase<V extends View, P extends Presenter<V>> extends I
       presenter.show("");
 
       baseResult.getActions().stream().sorted(Comparator.comparingInt(e -> e.getAction().getPriority()))
-          .forEach(action -> {
-            presenter.show(action.getAction().toStringWithColor() + " " + action.getType());
-          });
+          .forEach(action -> presenter.show(action.getAction().toStringWithColor() + " " + action.getType()));
 
       presenter.show("");
 
       final Set<String> urls = Sets.newHashSet();
-      final List<PatternPosition> sortedPositions = baseResult.getPatternPositions().stream().sorted(Comparator.comparing(PatternPosition::getUrl))
+      final List<PatternPosition> sortedPositions = baseResult.getPatternPositions().stream()
+          .sorted(Comparator.comparing(PatternPosition::getUrl))
           .collect(Collectors.toList());
-      for (int pi = 0; pi < Math.min(10, sortedPositions.size()); pi++) {
-        final PatternPosition position = sortedPositions.get(pi);
+      String next = scanner.next();
+      while (next.equals("open")) {
+        for (int pi = 0; pi < Math.min(10, sortedPositions.size()); pi++) {
+          final PatternPosition position = sortedPositions.get(pi);
 
-        if (!urls.contains(position.getUrl())) {
-          presenter.show(position.getUrl());
-          urls.add(position.getUrl());
+          if (!urls.contains(position.getUrl())) {
+            presenter.show(position.getUrl());
+            urls.add(position.getUrl());
+          }
+          open(position);
+          presenter.show(pi + ": " + position.getMjavaDiff());
+          Try.lambda(() -> Thread.sleep(10));
         }
-        open(position);
-        presenter.show(pi + ": " + position.getMjavaDiff());
-        Try.lambda(() -> Thread.sleep(10));
+        next = scanner.next();
       }
-
-      scanner.next();
     }
     scanner.close();
   }
